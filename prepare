@@ -1,0 +1,2 @@
+#!/bin/bash
+chmod +x  build-crossdev-toolchain  cleaner create-backup  create-stage3  create-stage4  cross-profile-switch  fixbrokenlibdirs  fixstage4 native-profile-switch x32emerge

@@ -1,0 +1,89 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this is a convenience script to delete the stage3/stage4 image so you can recreate the stage3/stage4 image again while preserving the muslx32 overlay for development purposes
+
+CROSSDEV_PROFILE="x86_64-pc-linux-muslx32"
+
+CROSSDEV_ROOT="$1"
+
+if [[ -z "${CROSSDEV_ROOT}" ]] ; then
+	echo "You need to specify the CROSSDEV_ROOT parameter for the call this script."
+	echo ""
+	echo $(basename "$0")" CROSSDEV_ROOT"
+	echo "CROSSDEV_ROOT - where you installed the crossdev image root."
+	echo ""
+	echo "See the contents of the script for details."
+	exit 1
+fi
+
+cd "${CROSSDEV_ROOT}"
+
+echo "Each decision is a checkpoint.  Checkpoints allow you to continue where you left off and make corrections to this script."
+
+unmount_all() {
+	while true ; do
+		echo "umounting dev"
+		umount dev
+		if [[ "$?" == "32" ]]; then
+			break
+		fi
+	done
+
+	while true ; do
+		echo "umounting proc"
+		umount proc
+		if [[ "$?" == "32" ]]; then
+			break
+		fi
+	done
+
+	while true ; do
+		echo "umounting usr/${CROSSDEV_PROFILE}/dev"
+		umount usr/${CROSSDEV_PROFILE}/dev
+		if [[ "$?" == "32" ]]; then
+			break
+		fi
+	done
+
+	while true ; do
+		echo "umounting usr/${CROSSDEV_PROFILE}/proc"
+		umount usr/${CROSSDEV_PROFILE}/proc
+		if [[ "$?" == "32" ]]; then
+			break
+		fi
+	done
+}
+
+unmount_all
+
+echo "delete the crossdev profile? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	crossdev -C ${CROSSDEV_PROFILE}
+fi
+
+echo "comprehensive wipe? home and root will be wiped in both the crossdev profile and in the crossdev image (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	unmount_all
+
+	rm -rf bin boot dev etc home lib lib64 libx32 media mnt proc root run sbin sys tmp var opt
+	rm -rf usr/{bin,include,lib,lib64,libexec,libx32,portage,sbin,share,src,tmp,x86_64-pc-linux-gnux32,x86_64-pc-linux-muslx32}
+	rm -rf usr/local/{bin,crossdev,lib,portage,sbin,musl-extras}
+fi

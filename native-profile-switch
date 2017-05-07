@@ -1,0 +1,41 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this script is used to switch the make.conf to point to make.conf.native to emerge inside the muslx32 profile
+
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
+
+echo "This should be run in the muslx32toolkit folder with appropriate chroot level containing the stage3 and portage snapshot at the root."
+
+if [ -e "/etc/portage/make.conf.native" ] ; then
+	cd "/etc/portage"
+elif [ -e "/usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native" ] ; then
+	cd "/usr/${CROSSDEV_TARGET}/etc/portage"
+else
+	echo "failed to find /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native or /etc/portage/make.conf.native"
+	exit 1
+fi
+
+rm make.conf
+echo "switching to native make.conf"
+ln -s make.conf.native make.conf
+

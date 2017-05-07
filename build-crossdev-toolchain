@@ -1,0 +1,87 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this is used to unpack the stage3 and portage tree and mount dev and proc before chrooting
+
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
+
+CROSSDEV_ROOT="$1"
+
+if [[ -z "${CROSSDEV_ROOT}" ]] ; then
+	echo "You need to specify the CROSSDEV_ROOT parameter for the call this script."
+	echo ""
+	echo $(basename "$0")" CROSSDEV_ROOT"
+	echo "CROSSDEV_ROOT - where to install the crossdev root.  It should contain both ${STAGE3_TARBALL} and ${PORTAGE_SNAPSHOT_TARBALL} tarballs."
+	echo ""
+	echo "See the contents of the script for details."
+	exit 1
+fi
+
+echo "Each decision is a checkpoint.  Checkpoints allow you to continue where you left off and make corrections to this script."
+
+cd "${CROSSDEV_ROOT}"
+echo "CROSSDEV_ROOT is ${CROSSDEV_ROOT}"
+
+if [ ! -f "${CROSSDEV_ROOT}/${STAGE3_TARBALL}" ] ; then
+	echo "Missing ${STAGE3_TARBALL} in ${CROSSDEV_ROOT}.  Please download it and put it in ${CROSSDEV_ROOT}."
+	exit 1
+fi
+
+if [ ! -f "${CROSSDEV_ROOT}/${PORTAGE_SNAPSHOT_TARBALL}" ] ; then
+	echo "Missing ${PORTAGE_SNAPSHOT_TARBALL} in ${CROSSDEV_ROOT}.  Please download it and put it in ${CROSSDEV_ROOT}."
+	exit 1
+fi
+
+echo "Unpack ${STAGE3_TARBALL} (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	tar -xvf ${CROSSDEV_ROOT}/${STAGE3_TARBALL}
+fi
+
+echo "Unpack ${PORTAGE_SNAPSHOT_TARBALL} (y/n)"
+read X
+
+if [[ "$X" == "y" ]] ; then
+	tar -xvf ${CROSSDEV_ROOT}/${PORTAGE_SNAPSHOT_TARBALL}
+fi
+
+mv portage usr
+
+echo "Mounting dev"
+mount --bind /dev dev
+echo "Mounting proc"
+mount -t proc proc proc
+echo "Copying resolv.conf to etc"
+cp /etc/resolv.conf etc
+
+echo "chroot into crossdev toolchain root? (y/n)"
+echo "you need to execute the create-stage3 manually if you decide to chroot"
+read X
+if [[ "$X" == "y" ]] ; then
+	echo "Chrooting..."
+	chroot . /bin/bash
+#	chroot . /bin/bash -c "muslx32toolkit/create-stage3" #uncomment and comment above line to automate
+fi
+
+#echo "folder is ${MUSLX32_TOOLKIT_FOLDER}"
+#cd ${MUSLX32_TOOLKIT_FOLDER}
+#./create-stage3

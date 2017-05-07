@@ -1,0 +1,70 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this was used to fix the baselayout problem of lib symlink not pointing to muslx32 so that programs were not confused of the split of use of distribution of libraries in lib and libx32.
+
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
+
+cd "/usr/${CROSSDEV_TARGET}/etc/portage"
+rm make.conf
+echo "switching to cross make.conf"
+ln -s make.conf.cross make.conf
+
+echo "This should be run in the muslx32toolkit folder with appropriate chroot level containing the stage3 and portage snapshot at the root."
+echo "fix broken lib in the crossdev profile? it will move lib to libx32 and symlink libx32 back to lib. (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	if [ -d /usr/${CROSSDEV_TARGET}/lib ] ; then
+		mkdir -p /usr/${CROSSDEV_TARGET}/libx32
+		cp -af /usr/${CROSSDEV_TARGET}/lib/* /usr/${CROSSDEV_TARGET}/libx32
+		cd /usr/${CROSSDEV_TARGET}/
+		rm -rf /usr/${CROSSDEV_TARGET}/lib
+		ln -s libx32 lib
+	fi
+
+	if [ -d /usr/${CROSSDEV_TARGET}/libx32 -a ! -L /usr/${CROSSDEV_TARGET}/lib ] ; then
+		cd /usr/${CROSSDEV_TARGET}/
+		ln -s libx32 lib
+	fi
+fi
+
+echo "fix broken usr/lib in the crossdev profile? it will move usr/lib to usr/libx32 and symlink usr/libx32 back to usr/lib. (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	if [ -d /usr/${CROSSDEV_TARGET}/usr/lib ] ; then
+		cp -af /usr/${CROSSDEV_TARGET}/usr/lib/* /usr/${CROSSDEV_TARGET}/usr/libx32/
+		cd /usr/${CROSSDEV_TARGET}/usr
+		rm -rf /usr/${CROSSDEV_TARGET}/usr/lib
+		ln -s libx32 lib
+	fi
+
+	if [ -d /usr/${CROSSDEV_TARGET}/usr/libx32 -a ! -L /usr/${CROSSDEV_TARGET}/usr/lib ] ; then
+		cd /usr/${CROSSDEV_TARGET}/usr
+		ln -s libx32 lib
+	fi
+fi
+
+cd "/usr/${CROSSDEV_TARGET}/etc/portage"
+rm make.conf
+echo "switching to native make.conf"
+ln -s make.conf.native make.conf
+

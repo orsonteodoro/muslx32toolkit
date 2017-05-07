@@ -1,0 +1,18 @@
+#!/sbin/openrc-run
+# Copyright (c) 2016 Orson Teodoro <orsonteodoro@yahoo.com>
+# Released under MIT.
+
+description="Fixing video permissions"
+
+depend()
+{
+	after localmount
+}
+
+start()
+{
+	einfo "Fixing video permissions"
+	chown root:video /dev/dri/card*
+	chmod 666 /dev/dri/card*
+	return 0
+}

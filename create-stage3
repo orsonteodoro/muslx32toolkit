@@ -1,0 +1,502 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this is used to create stage3 system image
+
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
+
+echo "This script (create-stage3) should be in the muslx32toolkit folder.  The muslx32roolkit folder should be in the same folder placed along side of the two tarballs (stage3 and portage snapshot).  the two tarballs should be at the root, if not chroot."
+echo "Each decision is a checkpoint.  Checkpoints allow you to continue where you left off and make corrections to this script."
+
+echo "portage sync on crossdev-root? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	emerge --sync
+fi
+
+echo "emerge portage on crosdev-root? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	emerge portage
+fi
+
+echo "apply package.mask for layman to emerge properly? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	mkdir -p /etc/portage/package.mask
+	touch /etc/portage/package.mask/layman
+	echo ">=dev-lang/perl-5.24.1-r1" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-JSON-PP-2.273.0.100_rc-r1" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-Scalar-List-Utils-1.420.200_rc-r1" >> /etc/portage/package.mask/layman
+	#echo ">=virtual/perl-Digest-SHA-5.950.100_rc-r1" >> /etc/portage/package.mask/layman
+	#echo ">=virtual/perl-MIME-Base64-3.150.0-r2" >> /etc/portage/package.mask/layman
+	#echo ">=virtual/perl-Digest-MD5-2.540.0-r2" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-ExtUtils-Manifest-1.700.0-r3" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-ExtUtils-Install-2.40.0-r2" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-libnet-3.80.100_rc" >> /etc/portage/package.mask/layman
+	echo ">=virtual/perl-Text-ParseWords-3.300.0-r2" >> /etc/portage/package.mask/layman
+
+	echo ">=virtual/perl-CPAN-Meta-2.150.5-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-version-0.991.600-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-File-Spec-3.630.100_rc" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-ExtUtils-MakeMaker-7.100.200_rc" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-ExtUtils-CBuilder-0.280.225-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Getopt-Long-2.480.0-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Test-Harness-3.360.100_rc" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Parse-CPAN-Meta-1.441.700.100_rc" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-ExtUtils-ParseXS-3.310.0-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Perl-OSType-1.9.0-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Data-Dumper-2.160.0-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-Module-Metadata-1.0.31-r1" >> /etc/portage/package.mask/layman
+        echo ">=virtual/perl-CPAN-Meta-YAML-0.18.0-r1" >> /etc/portage/package.mask/layman
+fi
+
+echo "emerge layman on crossdev-root? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	emerge layman
+fi
+
+echo "emerge crossdev on crossdev-root? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	emerge crossdev
+fi
+
+echo "what to do with the musl overlay on crossdev-root? (clone/update/skip)"
+echo "clone means new download."
+read X
+if [[ "$X" == "clone" ]] ; then
+	layman -L
+	layman -a musl
+elif [[ "$X" == "update" ]] ; then
+	layman -S
+fi
+
+echo "adding x-portage overlay on crossdev-root"
+mkdir -p /usr/local/portage/profiles
+echo "x-portage" > /usr/local/portage/profiles/repo_name
+
+echo "adding crossdev overlay on crossdev-root"
+mkdir -p /usr/local/crossdev/profiles
+echo "crossdev" > /usr/local/crossdev/profiles/repo_name
+
+echo "what to do with the musl-extras overlay on crossdev-root? (clone/update/skip)"
+echo "clone means new download."
+read X
+if [[ "$X" == "clone" ]] ; then
+	cd /usr/local
+	git clone "https://github.com/lluixhi/musl-extras.git"
+elif [[ "$X" == "update" ]] ; then
+	cd /usr/local/musl-extras
+	git pull
+fi
+
+echo "what to do with the muslx32 overlay on crossdev-root? (clone/update/skip)"
+echo "clone means new download."
+read X
+if [[ "$X" == "clone" ]] ; then
+	cd /usr/local
+	git clone "https://github.com/orsonteodoro/muslx32.git"
+elif [[ "$X" == "update" ]] ; then
+	cd /usr/local/muslx32
+	git pull
+fi
+
+grep "/usr/local/portage" /etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding local overlay to /etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/portage"' >> /etc/portage/make.conf
+fi
+
+grep "/usr/local/muslx32" /etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding muslx32 overlay to /etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/muslx32"' >> /etc/portage/make.conf
+fi
+
+grep "/usr/local/musl-extras" /etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding musl-extras overlay to /etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/musl-extras"' >> /etc/portage/make.conf
+fi
+
+grep "/var/lib/layman/musl" /etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding musl overlay to /etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /var/lib/layman/musl"' >> /etc/portage/make.conf
+fi
+
+grep "/usr/local/crossdev" /etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding crossdev overlay to /etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/crossdev"' >> /etc/portage/make.conf
+fi
+
+echo "creating /etc/portage/repos.conf/muslx32.conf"
+mkdir -p /etc/portage/repos.conf
+touch /etc/portage/repos.conf/muslx32.conf
+echo '[muslx32]' > /etc/portage/repos.conf/muslx32.conf
+echo 'priority = 100' >> /etc/portage/repos.conf/muslx32.conf
+
+grep "gcc-${GCC_VERSION}" /etc/portage/package.mask/gcc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking gcc >${GCC_VERSION}"
+	mkdir -p /etc/portage/package.mask
+	touch "/etc/portage/package.mask/gcc"
+	echo ">cross-${CROSSDEV_TARGET}/gcc-${GCC_VERSION}" >> /etc/portage/package.mask/gcc
+	echo ">sys-devel/gcc-${GCC_VERSION}" >> /etc/portage/package.mask/gcc
+	echo "sys-devel/gcc::musl" >> /etc/portage/package.mask/gcc
+fi
+
+grep "openssh::musl" /etc/portage/package.mask/openssh > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking openssh::musl in /etc/portage/package.mask/openssh"
+	mkdir -p /etc/portage/package.mask
+	touch "/etc/portage/package.mask/openssh"
+	echo "net-misc/openssh::musl" >> /etc/portage/package.mask/openssh
+fi
+
+grep "openssh::musl" /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/openssh > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking openssh::musl in /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/openssh"
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.mask
+	touch "/usr/${CROSSDEV_TARGET}/etc/portage/package.mask/openssh"
+	echo "net-misc/openssh::musl" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/openssh
+fi
+
+echo "setting profile to hardened/linux/musl/amd64/x32"
+eselect profile set hardened/linux/musl/amd64/x32
+#eselect profile set default/linux/amd64/${PROFILE_VERSION}/x32
+
+echo "init crossdev target files"
+crossdev -v -S -A x32 --ov-output /usr/local/crossdev --ov-gcc /var/lib/layman/musl --ov-libc /usr/local/muslx32 --g "=${GCC_VERSION}" --l "=${MUSL_VERSION}" --init-target --target ${CROSSDEV_TARGET}
+
+#temporary fix.  seems bugged for some reason
+echo "copying ${MUSLX32_TOOLKIT_FOLDER}/make.conf to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.  it will override your changes."
+mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage
+cp ${MUSLX32_TOOLKIT_FOLDER}/make.conf  /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+sed -i -e "s|__CHOST__|${___CHOST___}|g" -e "s|__CBUILD__|${___CBUILD___}|g" -e "s|__ARCH__|${___ARCH___}|g" make.conf -e "s|__LIBC__|${___LIBC___}|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+
+echo "remove ~${___ARCH___} from ACCEPT_KEYWORDS of the crossdev profile if any? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	echo "removing ~${___ARCH___} ACCEPT_KEYWORDS"
+	A="~${___ARCH___}" B="" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+echo "patching /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+sed -i -e "s|__LIBC__|musl|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+
+grep "cross-${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" /etc/portage/package.use/gcc > /dev/null
+if [[ "$?" != 0 ]] ; then
+	echo "Masking use flags for gcc: -vtv -fortran -sanitize"
+	mkdir -p /etc/portage/package.use
+	touch /etc/portage/package.use/gcc
+	echo "cross-${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" >> /etc/portage/package.use/gcc
+	echo "sys-devel/gcc -vtv -fortran -sanitize" >> /etc/portage/package.use/gcc
+fi
+
+echo "grab and build muslx32 cross toolchain? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	crossdev -v -S -A x32 --ov-output /usr/local/crossdev --ov-gcc /var/lib/layman/musl --ov-libc /usr/local/muslx32 --g "=${GCC_VERSION}" --l "=${MUSL_VERSION}" --target ${CROSSDEV_TARGET}
+fi
+
+echo "copy emerge bashrc fix? (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	cp -a ${MUSLX32_TOOLKIT_FOLDER}/bashrc /usr/${CROSSDEV_TARGET}/etc/portage
+fi
+
+echo "creating symlink to profile for new crossdev profile"
+cd /usr/${CROSSDEV_TARGET}/etc/portage
+rm make.profile{,.orig}
+ln -s /usr/portage/profiles/hardened/linux/musl/amd64/x32 ./make.profile
+#ln -s /usr/portage/profiles/embedded ./make.profile.orig
+
+if [ ! -f "/usr/${CROSSDEV_TARGET}/resolv.conf" ] ; then
+	echo "copying resolve.conf to crossdev profile"
+	cp -a /etc/resolv.conf /usr/${CROSSDEV_TARGET}/etc
+fi
+
+echo "creating missing proc folder"
+cd /usr/${CROSSDEV_TARGET}
+mkdir proc
+
+echo "adding missing dev"
+cd /usr/${CROSSDEV_TARGET}
+mkdir dev
+cd dev
+mknod console c 0 0
+mknod -m 666 null c 1 3
+mknod -m 666 zero c 1 5
+
+echo "mounting proc and dev for new crossdev profile"
+cd /usr/${CROSSDEV_TARGET}
+mount -t proc proc proc
+mount --bind /dev dev #urandom fix
+
+echo "add cross compile kernel script?  It will be called xkmake (y/n)"
+read X
+if [[ "$X" == "y" ]] ; then
+	cd /
+	mkdir -p /usr/${CROSSDEV_TARGET}/usr/src
+	cp ${MUSLX32_TOOLKIT_FOLDER}/xkmake /usr/${CROSSDEV_TARGET}/usr/src
+	chmod +x /usr/${CROSSDEV_TARGET}/usr/src/xkmake
+fi
+
+echo "adding overlays to crossdev profile"
+
+grep "CURRENT_ROOT=" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding CURRENT_ROOT to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	echo 'CURRENT_ROOT="/"' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "/usr/local/portage" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding local overlay to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} ${CURRENT_ROOT}/usr/local/portage"' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "/usr/local/muslx32" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding muslx32 overlay to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} ${CURRENT_ROOT}/usr/local/muslx32"' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "/usr/local/musl-extras" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding musl-extras overlay to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} ${CURRENT_ROOT}/usr/local/musl-extras"' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "/var/lib/layman/musl" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf > /dev/null
+if [[ "$?" == "1" ]] ; then
+	echo "Adding musl overlay to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} ${CURRENT_ROOT}/var/lib/layman/musl"' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "gcc-${GCC_VERSION}" /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/gcc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking crossdev profile's gcc >${GCC_VERSION}"
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.mask
+	touch "/usr/${CROSSDEV_TARGET}/etc/portage/package.mask/gcc"
+	echo ">sys-devel/gcc-${GCC_VERSION}" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/gcc
+	echo "sys-devel/gcc::musl" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/gcc
+fi
+
+grep "musl::musl-extras" /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/musl > /dev/null
+if [[ "$?" != "0" ]] ; then
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.mask
+	touch "/usr/${CROSSDEV_TARGET}/etc/portage/package.mask/musl"
+	echo "Masking crossdev-profile's musl on some overlays (musl,musl-extras,gentoo)"
+	echo "sys-libs/musl::musl-extras" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/musl
+	echo "sys-libs/musl::musl" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/musl
+	echo "sys-libs/musl::gentoo" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/musl
+fi
+
+grep "sys-process/psmisc::musl" /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/psmisc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking crossdev profile's psmisc::musl"
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.mask
+	touch "/usr/${CROSSDEV_TARGET}/etc/portage/package.mask/psmisc"
+	echo "sys-process/psmisc::musl" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/psmisc
+fi
+
+grep "sys-apps/portage::musl" /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/portage > /dev/null
+if [[ "$?" != "0" ]] ; then
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.mask
+	touch "/usr/${CROSSDEV_TARGET}/etc/portage/package.mask/portage"
+	echo "Masking crossdev profile's portage::musl"
+	echo "sys-apps/portage::musl" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/portage
+	echo "Masking crossdev profile's portage::gentoo"
+	echo "sys-apps/portage::gentoo" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/portage
+fi
+
+grep "${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" /usr/${CROSSDEV_TARGET}/etc/portage/package.use/gcc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "Masking use flags for crossdev profile's gcc: -vtv -fortran -sanitize"
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.use
+	touch /usr/${CROSSDEV_TARGET}/etc/portage/package.use/gcc
+	echo "sys-devel/gcc -vtv -fortran -sanitize" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.use/gcc
+fi
+
+echo "forcing MAKEOPTS=\"-j1\""
+grep "MAKEOPTS=" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+if [[ "$?" != "0" ]] ; then
+	echo 'MAKEOPTS="-j1" #muslx32 does not support MAKEOPTS>1 do not change' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+echo "remove ~${___ARCH___} from ACCEPT_KEYWORDS of the crossdev profile if any? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	echo "removing ~${___ARCH___} ACCEPT_KEYWORDS"
+	A="~${___ARCH___}" B="" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+grep "=sys-devel/gcc-${GCC_VERSION}" /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/gcc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "keywording =sys-devel/gcc-${GCC_VERSION} in /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/gcc"
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/
+	touch /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/gcc
+	echo "=sys-devel/gcc-${GCC_VERSION} **" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/gcc
+fi
+
+grep "=sys-libs/musl-${MUSL_VERSION}" /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl > /dev/null
+if [[ "$?" != "0" ]] ; then
+        echo "keywording =sys-libs/musl-${MUSL_VERSION} in /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl"
+        mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/
+        touch /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl
+        echo "=sys-libs/musl-${MUSL_VERSION} **" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl
+fi
+
+echo "creating /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf"
+mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf
+touch /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+echo '[muslx32]' > /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+echo 'priority = 100' >> /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+
+echo "creating /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf"
+mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf
+touch /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+echo '[muslx32]' > /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+echo 'priority = 100' >> /usr/${CROSSDEV_TARGET}/etc/portage/repos.conf/muslx32.conf
+
+
+
+#make sure openssh and openssl have same bindist use flag
+grep "net-misc/openssh bindist" /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssh > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "adding use net-misc/openssh bindist"
+	touch /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssh
+	echo 'net-misc/openssh bindist' >> /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssh
+fi
+
+grep "dev-libs/openssl bindist" /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssl > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "adding use dev-libs/openssl -bindist"
+	touch /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssl
+	echo 'dev-libs/openssl bindist' >> /usr/${CROSSDEV_TARGET}/etc/portage/package.use/openssl
+fi
+
+
+
+grep "=sys-libs/musl-${MUSL_VERSION} **" /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "keywording =sys-libs/musl-${MUSL_VERSION}"
+	touch /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl
+	echo "=sys-libs/musl-${MUSL_VERSION} **" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/musl
+fi
+
+grep "=sys-libs/musl-${MUSL_VERSION}" /usr/${CROSSDEV_TARGET}/etc/portage/package.unmask/musl > /dev/null
+if [[ "$?" != "0" ]] ; then
+        echo "unmask =sys-libs/musl-${MUSL_VERSION} in /usr/${CROSSDEV_TARGET}/etc/portage/package.unmask/musl"
+        mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.unmask/
+        touch /usr/${CROSSDEV_TARGET}/etc/portage/package.unmask/musl
+        echo "=sys-libs/musl-${MUSL_VERSION}" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.unmask/musl
+fi
+
+
+echo "use cross toolchain to build crossdev profile's system? (all/resume/skip)"
+echo "all will execute: ${CROSSDEV_TARGET}-emerge -ve system."
+echo "resume will execute: ${CROSSDEV_TARGET}-emerge -v --resume."
+echo "skip will go on to the next step."
+echo "before you press anyting, you may want to edit /usr/${CROSSDEV_TARGET}/etc/portage/make.conf to set the cflags or any use flags."
+read X
+if [[ "$X" == "all" ]] ; then
+	#${CROSSDEV_TARGET}-emerge -1Ov =zlib-${ZLIB_VERSION}
+	#${CROSSDEV_TARGET}-emerge -1Ov =openssl-${OPENSSL_VERSION}
+	${CROSSDEV_TARGET}-emerge -ve system
+	echo "if all packages emerged, you created the stage 3 tarball equivalent."
+elif [[ "$X" == "resume" ]] ; then
+	${CROSSDEV_TARGET}-emerge -v --resume
+	echo "if all packages emerged, you created the stage 3 tarball equivalent."
+fi
+
+if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/local/portage" ] ; then
+	echo "copying /usr/local/portage before chrooting"
+	cp -a /usr/local/portage /usr/${CROSSDEV_TARGET}/usr/local/
+fi
+
+if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/local/musl-extras" ] ; then
+	echo "copying /usr/local/musl-extras before chrooting"
+	cp -a /usr/local/musl-extras /usr/${CROSSDEV_TARGET}/usr/local/
+fi
+
+if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/local/muslx32" ] ; then
+	echo "copying /usr/local/muslx32 before chrooting"
+	cp -a /usr/local/muslx32 /usr/${CROSSDEV_TARGET}/usr/local/
+fi
+
+if [ ! -d "/usr/${CROSSDEV_TARGET}/var/lib/layman/musl" ] ; then
+	echo "copying /usr/local/muslx32 before chrooting"
+	mkdir -p /usr/${CROSSDEV_TARGET}/var/lib/layman
+	cp -a /var/lib/layman/musl /usr/${CROSSDEV_TARGET}/var/lib/layman/
+fi
+
+if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/portage" ] ; then
+	echo "copying /usr/portage before chrooting"
+	cp -a /usr/portage /usr/${CROSSDEV_TARGET}/usr/
+fi
+
+if [ ! -f "/usr/${CROSSDEV_TARGET}/etc/portage/make.conf.cross" ] ; then
+	cd /usr/${CROSSDEV_TARGET}/etc/portage/
+	echo "move old make.conf to make.conf.cross"
+	mv /usr/${CROSSDEV_TARGET}/etc/portage/make.conf /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.cross
+	echo "generating new make.conf.native"
+	touch make.conf.native
+	echo 'CFLAGS="-O2 -pipe -fomit-frame-pointer"' >> make.conf.native
+	echo 'CXXFLAGS="${CFLAGS}"' >> make.conf.native
+	echo 'CHOST="'${___CHOST___}'"' >> make.conf.native
+	echo 'USE="bindist"' >> make.conf.native
+	echo 'USE="${USE} -nls" #deprecate gnu gettext.  use the one provided by musl.' >> make.conf.native
+	echo 'CPU_FLAGS_X86="mmx sse sse2"' >> make.conf.native
+	echo '#FEATURES="-collision-protect sandbox buildpkg noman noinfo nodoc"' >> make.conf.native
+	echo 'FEATURES="sandbox"' >> make.conf.native
+	echo 'ACCEPT_KEYWORDS="'${___ARCH___}'"' >> make.conf.native
+	echo 'PORTDIR="/usr/portage"' >> make.conf.native
+	echo 'DISTDIR="${PORTDIR}/distfiles"' >> make.conf.native
+	echo 'PKGDIR="${PORTDIR}/packages"' >> make.conf.native
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/portage"' >> make.conf.native
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/muslx32"' >> make.conf.native
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /usr/local/musl-extras"'  >> make.conf.native
+	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /var/lib/layman/musl"' >> make.conf.native
+	echo 'MAKEOPTS="-j1" #muslx32 does not support MAKEOPTS>1 do not change' >> make.conf.native
+	echo "symlinking make.conf.native to make.conf"
+	ln -s make.conf.native make.conf
+	echo "change symlink of make.conf to make.conf.cross to use the cross compiler.  this is useful for developing the musl library."
+	echo "change symlink of make.conf to make.conf.native to use the native compiler for the ${CROSSDEV_TARGET} profile.  this is the default."
+fi
+
+echo "copying muslx32toolkit folder into /usr/${CROSSDEV_TARGET}"
+cp -a ${MUSLX32_TOOLKIT_FOLDER} /usr/${CROSSDEV_TARGET}
+
+echo "chroot into crossdev profile? (y/n)"
+echo "you should run create-stage4 after chrooting to fix any problems"
+read X
+if [[ "$X" == "y" ]] ; then
+	echo "chrooting..."
+	chroot /usr/${CROSSDEV_TARGET} /bin/bash
+	#chroot . /bin/bash -c "muslx32toolkit/create-stage4" #uncomment and comment above line to automate
+fi

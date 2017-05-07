@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+# Copyright (c) 2016 Orson Teodoro <orsonteodoro@yahoo.com>
+# Released under MIT.
+
+description="Fixing ALSA for non-root user"
+
+depend()
+{
+	after udev
+}
+
+start()
+{
+	einfo "Fixing ALSA for non-root"
+	udevadm test /sys/devices/pci*/*/sound/card0/controlC0 2&>1 >/dev/null
+	udevadm test /sys/devices/pci*/*/sound/card0/pcmC0D0c 2&>1 >/dev/null
+	udevadm test /sys/devices/pci*/*/sound/card0/pcmC0D0p 2&>1 >/dev/null
+	udevadm test /sys/devices/pci*/*/sound/card0/pcmC0D1c 2&>1 >/dev/null
+	udevadm test /sys/devices/pci*/*/sound/card0/pcmC0D1p 2&>1 >/dev/null
+	return 0
+}

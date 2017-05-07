@@ -1,0 +1,42 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile 
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this is used to package the stage3/stage4 image in a tar archive
+
+#you need to drop chroot so that the archive can be output outside the muslx32 root
+
+SRC="$1" #full folder path
+DEST="$2" #full folder path
+DESC="$3" #description
+
+if [[ -z "${SRC}" || -z "${DEST}" || -z "${DESC}"]] ; then
+	echo "You need to specify the SRC, DEST, DESC parameters for the call this script."
+	echo ""
+	echo $(basename "$0")" SRC DEST DESC"
+	echo "SRC - path to folder to find the muslx32 root."
+	echo "DEST - path to folder to dump the muslx32 archive."
+	echo "DESC - description to add to archive.  It should be non whitespace and no special characters."
+	echo ""
+	echo "Notes:  This expect to not be ran outside of chroot so that it can dump the muslx32 image outside the root."
+	echo "It by default only produces a tar file.  Additional parameters can be added by modifying this script."
+	echo ""
+	echo "See the contents of the script for details."
+	exit 1
+fi
+
+tar -cvpf ${DEST}/muslx32-${DESC}-$(date +"%Y%m%d").tar --directory=${SRC} --exclude=usr/portage --exclude=var/tmp/* --exclude=usr/local/musl-extras --exclude=usr/local/muslx32 --exclude=var/lib/layman --exclude=usr/local/portage --exclude=etc/resolv.conf --xattrs --selinux --acls --exclude=tmp/*  .

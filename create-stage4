@@ -1,0 +1,386 @@
+#!/bin/bash
+# muslx32toolkit - scripts to generate a stage3 and stage4 image for Gentoo Linux using crossdev for the muslx32 profile
+# Copyright (C) 2017  Orson Teodoro <orsonteodoro@yahoo.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#note: this is used to create stage4 world image
+
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
+
+echo "this script (create-stage4) should exist in the muslx32toolkit folder of the crossdev-profile root.  if not, chroot into the crossdev profile."
+
+cd "/etc/portage"
+rm make.conf
+echo "switching to native make.conf"
+ln -s make.conf.native make.conf
+
+grep "dev-util/pkgconfig internal-glib" /etc/portage/package.use/pkgconfig > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "adding use dev-util/pkgconfig internal-glib to fix circular dependency"
+	touch /etc/portage/package.use/pkgconfig
+	echo 'dev-util/pkgconfig internal-glib' >> /etc/portage/package.use/pkgconfig
+fi
+
+grep "sys-apps/help2man -nls" /etc/portage/package.use/pkgconfig > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "adding use sys-apps/help2man -nls to fix circular dependency"
+	touch /etc/portage/package.use/help2man
+	echo 'sys-apps/help2man -nls' >> /etc/portage/package.use/help2man
+fi
+
+grep "net-dns/libidn -nls" /etc/portage/package.use/libidn > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "adding use net-dns/libidn -nls to fix circular dependency"
+	touch /etc/portage/package.use/libidn
+	echo 'net-dns/libidn -nls' >> /etc/portage/package.use/libidn
+fi
+
+grep "=sys-libs/musl-${MUSL_VERSION}" /etc/portage/package.keywords/musl > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "keywording =sys-libs/musl-${MUSL_VERSION}"
+	mkdir -p /etc/portage/package.keywords/
+	touch /etc/portage/package.keywords/musl
+	echo "=sys-libs/musl-${MUSL_VERSION} **" >> /etc/portage/package.keywords/musl
+fi
+
+grep "=sys-devel/gcc-${GCC_VERSION}" /etc/portage/package.keywords/gcc > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "keywording =sys-devel/gcc-${GCC_VERSION}"
+	mkdir -p /etc/portage/package.keywords/
+	touch /etc/portage/package.keywords/gcc
+	echo "=sys-devel/gcc-${GCC_VERSION} **" >> /etc/portage/package.keywords/gcc
+fi
+
+grep "=sys-apps/net-tools-${NET_TOOLS_VERISION}" /etc/portage/package.keywords/net-tools > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "keywording =sys-apps/net-tools-${NET_TOOLS_VERISION}"
+	mkdir -p /etc/portage/package.keywords/
+	touch /etc/portage/package.keywords/net-tools
+	echo "=sys-apps/net-tools-${NET_TOOLS_VERISION}" >> /etc/portage/package.keywords/net-tools
+fi
+
+grep "sys-apps/net-tools::gentoo" /etc/portage/package.mask/net-tools > /dev/null
+if [[ "$?" != "0" ]] ; then
+	echo "masking sys-apps/net-tools::gentoo"
+	mkdir -p /etc/portage/package.mask/
+	touch /etc/portage/package.mask/net-tools
+	echo "sys-apps/net-tools::gentoo" >> /etc/portage/package.mask/net-tools
+fi
+
+#grep "dev-libs/gnulib" /etc/portage/package.keywords/gnulib > /dev/null
+#if [[ "$?" != "0" ]] ; then
+#	echo "keywording dev-libs/gnulib **"
+#	mkdir -p /etc/portage/package.keywords/
+#	touch /etc/portage/package.keywords/gnulib
+#	echo "dev-libs/gnulib **" >> /etc/portage/package.keywords/gnulib
+#fi
+
+echo "emerge system? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
+echo "full does a full emerge of the system"
+echo "resume continues where emerge system left off"
+echo "note: some packages require you to drop chroot and run fixstage4.  packages that require running fixstage4: baselayout, coreutils, perl, libtool, iniparser, iptables, procps, readline, mpfr, libnl, m2crypto"
+echo "specifically:"
+echo "note: failed native baselayout requires compiled baselayout."
+echo "note: failed native coreutils requires cross compiled coreutils."
+echo "note: failed native perl requires cross compiled mpfr."
+echo "note: failed native libtool requires cross compiled libtool."
+echo "note: failed native iniparser requires cross compiled iniparser."
+echo "note: failed native iptables requires cross compiled iptables."
+echo "note: failed native procps requires cross compiled readline."
+echo "note: debug spew complaining about readline requires cross compiled readline.."
+echo "note: gcc failure with internal compiler error: Segmentation fault? or with cracklib means try emerging mpfr."
+echo "note: failed native libnl requires cross compiled libnl."
+echo "note: failed native m2crypto requires cross compiled m2crypto."
+read X
+if [[ "${X}" == "full" ]] ; then
+	emerge -ve system
+elif [[ "${X}" == "resume" ]] ; then
+	emerge -v --resume
+elif [[ "${X}" == "skipfirstresume" ]] ; then
+	emerge -v --skip-first --resume
+fi
+
+
+echo "emerge world? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
+echo "note: same failed dependencies means you need to run fixstage4."
+read X
+if [[ "${X}" == "full" ]] ; then
+	emerge -ve world
+elif [[ "${X}" == "resume" ]] ; then
+	emerge -v --resume
+elif [[ "${X}" == "skipfirstresume" ]] ; then
+	emerge -v --skip-first --resume
+fi
+
+echo "emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
+read X
+if [[ "${X}" == "full" ]] ; then
+	emerge -v wpa_supplicant
+elif [[ "${X}" == "resume" ]] ; then
+	emerge -v --resume
+elif [[ "${X}" == "skipfirstresume" ]] ; then
+	emerge -v --resume --skip-first
+fi
+
+echo "emerge layman (required to update musl repository)? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v layman
+fi
+
+
+echo "sync and update musl overlay? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	layman -L
+	layman -a musl
+	layman -S
+fi
+
+echo "emerge dhcpcd? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v dhcpcd
+fi
+
+echo "emerge wireless-tools? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v wireless-tools
+fi
+
+echo "emerge links text user interface web browser? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v links
+fi
+
+echo "emerge ntp? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v ntp
+fi
+
+echo "emerge gentoo-sources? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v gentoo-sources
+fi
+
+echo "emerge xorg-x11? (full/resume/skipfirstresume/skipall)"
+read X
+if [[ "${X}" == "yes" ]] ; then
+	emerge -v xorg-x11
+elif [[ "${X}" == "resume" ]] ; then
+	emerge -v --resume
+elif [[ "${X}" == "skipfirstresume" ]] ; then
+	emerge -v --resume --skip-first
+fi
+
+echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf"
+echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
+read X
+if [[ "${X}" == "yes" ]] ; then
+	cp -a configs/20-nouveau.conf /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf
+fi
+
+echo "emerge dwm window manager? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v dwm
+fi
+
+echo "emerge xfce4-meta window manager? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v xfce4-meta
+fi
+
+echo "emerge xfce4-terminal? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-terminal > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/xfce4-terminal
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/xfce4-terminal
+	fi
+
+	emerge -v xfce4-terminal
+fi
+
+echo "emerge firefox? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	mkdir -p /etc/portage/package.use/
+	touch /etc/portage/package.use/firefox
+	grep "dev-lang/python sqlite" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-lang/python sqlite"
+		echo 'dev-lang/python sqlite' >> /etc/portage/package.use/firefox
+	fi
+
+	grep "media-libs/libpng apng" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-libs/libpng apng"
+		echo 'media-libs/libpng apng' >> /etc/portage/package.use/firefox
+	fi
+
+	grep "media-video/ffmpeg cpu_flags_x86_mmxext" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-video/ffmpeg cpu_flags_x86_mmxext"
+		echo 'media-video/ffmpeg cpu_flags_x86_mmxext' >> /etc/portage/package.use/firefox
+	fi
+
+	#required for x32 since the one provided by firefox is messed up
+	grep "www-client/firefox system-libvpx" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use www-client/firefox system-libvpx"
+		echo 'www-client/firefox system-libvpx' >> /etc/portage/package.use/firefox
+	fi
+
+	#dependency of libvpx
+	grep "media-libs/libvpx postproc" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-libs/libvpx postproc"
+		echo 'media-libs/libvpx postproc' >> /etc/portage/package.use/firefox
+	fi
+
+	mkdir -p /etc/portage/package.mask/
+	touch /etc/portage/package.mask/firefox
+	grep ">www-client/firefox-${FIREFOX_VERSION}" /etc/portage/package.mask/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "masking >www-client/firefox-${FIREFOX_VERSION}"
+		echo ">www-client/firefox-${FIREFOX_VERSION}" >> /etc/portage/package.mask/firefox
+	fi
+
+	grep "app-text/hunspell::musl" /etc/portage/package.mask/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "masking app-text/hunspell::musl"
+		echo "app-text/hunspell::musl" >> /etc/portage/package.mask/firefox
+	fi
+
+	emerge -v firefox
+fi
+
+echo "emerge alsa-utils? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v alsa-utils
+fi
+
+echo "emerge leafpad? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v leafpad
+fi
+
+echo "emerge geany? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v geany
+fi
+
+echo "emerge lilo (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v lilo
+fi
+
+echo "emerge mplayer (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+
+	grep "media-video/ffmpeg cpu_flags_x86_mmxext" /etc/portage/package.use/mplayer > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-video/ffmpeg cpu_flags_x86_mmxext"
+		echo 'media-video/ffmpeg cpu_flags_x86_mmxext' >> /etc/portage/package.use/mplayer
+	fi
+
+	#update: compiles fine with simd
+	#echo "masking simd for mplayer"
+	#grep "media-video/mplayer -cpu_flags_x86_mmxext" /etc/portage/package.use/mplayer > /dev/null
+	#if [[ "$?" != "0" ]] ; then
+	#	echo "adding use media-video/mplayer -cpu_flags_x86_mmxext"
+	#	echo 'media-video/mplayer -cpu_flags_x86_mmxext' >> /etc/portage/package.use/mplayer
+	#fi
+
+	#grep "media-video/mplayer -cpu_flags_x86_sse" /etc/portage/package.use/mplayer > /dev/null
+	#if [[ "$?" != "0" ]] ; then
+	#	echo "adding use media-video/mplayer -cpu_flags_x86_sse"
+	#	echo 'media-video/mplayer -cpu_flags_x86_sse' >> /etc/portage/package.use/mplayer
+	#fi
+
+	#grep "media-video/mplayer -cpu_flags_x86_sse2" /etc/portage/package.use/mplayer > /dev/null
+	#if [[ "$?" != "0" ]] ; then
+	#	echo "adding use media-video/mplayer -cpu_flags_x86_sse2"
+	#	echo 'media-video/mplayer -cpu_flags_x86_sse2' >> /etc/portage/package.use/mplayer
+	#fi
+
+	emerge -v mplayer
+fi
+
+echo "emerge filezilla (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	grep "app-text/xmlto text" /etc/portage/package.use/filezilla > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use app-text/xmlto text"
+		echo 'app-text/xmlto text' >> /etc/portage/package.use/filezilla
+	fi
+
+	grep "x11-libs/pango X" /etc/portage/package.use/filezilla > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/pango X"
+		echo 'x11-libs/pango X' >> /etc/portage/package.use/filezilla
+	fi
+
+	emerge -v filezilla
+fi
+
+echo "emerge strace (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v strace
+fi
+
+echo "emerge gdb (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	emerge -v gdb
+fi
+
+echo "set root password? (yes/no)"
+read X
+if [[ "${X}" == "yes" ]] ; then
+	passwd
+fi
+
+echo "checklist of things to still do:"
+echo ""
+echo "edit /etc/fstab"
+echo "add users"
+echo "setup bootloader config"
+echo "install bootloader"
+echo "configure wpa_supplicant or /etc/conf.d/net"
+echo "add network devices for /etc/init.d/net.*"
+echo "copy and modify muslx32toolkit/configs/_.asound.rc to user home directory as .asound.rc"
+echo "edit kernel settings"
+echo "generate kernel if needed"

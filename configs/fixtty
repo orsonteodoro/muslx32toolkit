@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+# Copyright (c) 2016 Orson Teodoro <orsonteodoro@yahoo.com>
+# Released under MIT.
+
+description="Fixing tty permissions"
+
+depend()
+{
+	need localmount
+	after udev
+}
+
+start()
+{
+	einfo "Fixing tty permissions"
+	chown root:tty /dev/pty*
+	chmod 660 /dev/pty*
+
+	chmod 666 /dev/ptmx
+
+	chown root:tty /dev/tty*
+	chmod 660 /dev/tty*
+
+	chmod 666 /dev/null
+	chmod 666 /dev/random
+	chmod 666 /dev/urandom
+
+	return 0
+}

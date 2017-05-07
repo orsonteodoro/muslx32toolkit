@@ -1,7 +1,7 @@
 # muslx32toolkit
 BASH Scripts for Gentoo Linux to build stage3 and stage4 images using crossdev for the muslx32 platform
 
-The scripts use a checkpoint system so you can edit and return back to that step them if they fail.  You may need to edit the config file to properly edit packages to unmask or and use, or specific files/versions to use.
+The scripts use an interactive checkpoint system so you can edit and return back to that step them if they fail.  You may need to edit the config file to properly edit packages to unmask or and use, or specific files/versions to use.
 
 Step 0: Download the stage3 tarball and the portage snapshot contained in the config file.  It is important that you make sure you download the files in a folder that is either a mounted partition or a new folder.
 

@@ -186,7 +186,7 @@ fi
 
 echo "emerge xorg-x11? (full/resume/skipfirstresume/skipall)"
 read X
-if [[ "${X}" == "yes" ]] ; then
+if [[ "${X}" == "full" ]] ; then
 	emerge -v xorg-x11
 elif [[ "${X}" == "resume" ]] ; then
 	emerge -v --resume
@@ -194,10 +194,10 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 	emerge -v --resume --skip-first
 fi
 
-echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf"
+echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf (y/n)"
 echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
 read X
-if [[ "${X}" == "yes" ]] ; then
+if [[ "${X}" == "y" ]] ; then
 	cp -a configs/20-nouveau.conf /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf
 fi
 

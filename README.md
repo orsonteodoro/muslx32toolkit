@@ -29,6 +29,16 @@ Step 6: Run ./create-stage4
 
 Step 7: Run ./fixstage4 corrective script if in the step 6's create-stage4 script fails then repeat step 7
 
+Step 8: Modify /etc/fstab
+
+Step 9: Modify bootloader and install it
+
+Step 10: Add users
+
+Step 11: Add root password
+
+Step 12: Perform any additions to your stage4 image
+
 ## License
 
 The files in this package are licensed under GPL version 2 or newer.

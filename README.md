@@ -15,7 +15,7 @@ Step 2: Run ./prepare
 
 Step 3: Move the muslx32toolkit folder into the same folder as the stage3 and portage snapshot
 
-Step 4: Run ./build-crossdev-toolchain
+Step 4: Run ./build-crossdev-toolchain `<full-path-containing-both-stage3-and-portage-tarball>`
 
 (chroot)
 

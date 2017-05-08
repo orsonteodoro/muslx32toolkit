@@ -68,12 +68,12 @@ if [[ "$?" != "0" ]] ; then
 	echo "=sys-devel/gcc-${GCC_VERSION} **" >> /etc/portage/package.keywords/gcc
 fi
 
-grep "=sys-apps/net-tools-${NET_TOOLS_VERISION}" /etc/portage/package.keywords/net-tools > /dev/null
+grep "=sys-apps/net-tools-${NET_TOOLS_VERSION}" /etc/portage/package.keywords/net-tools > /dev/null
 if [[ "$?" != "0" ]] ; then
-	echo "keywording =sys-apps/net-tools-${NET_TOOLS_VERISION}"
+	echo "keywording =sys-apps/net-tools-${NET_TOOLS_VERSION}"
 	mkdir -p /etc/portage/package.keywords/
 	touch /etc/portage/package.keywords/net-tools
-	echo "=sys-apps/net-tools-${NET_TOOLS_VERISION}" >> /etc/portage/package.keywords/net-tools
+	echo "=sys-apps/net-tools-${NET_TOOLS_VERSION}" >> /etc/portage/package.keywords/net-tools
 fi
 
 grep "sys-apps/net-tools::gentoo" /etc/portage/package.mask/net-tools > /dev/null
@@ -187,6 +187,23 @@ fi
 echo "emerge xorg-x11? (full/resume/skipfirstresume/skipall)"
 read X
 if [[ "${X}" == "full" ]] ; then
+	#llvm is required for the xorg-drivers and mesa
+	grep "=sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.keywords/llvm > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "keywording =sys-devel/llvm-${LLVM_VERSION} **"
+		mkdir -p /etc/portage/package.keywords/
+		touch /etc/portage/package.keywords/llvm
+		echo "=sys-devel/llvm-${LLVM_VERSION} **" >> /etc/portage/package.keywords/llvm
+	fi
+
+	grep ">sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.mask/llvm > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "masking >sys-devel/llvm-${LLVM_VERSION}"
+		mkdir -p /etc/portage/package.mask/
+		touch /etc/portage/package.mask/llvm
+		echo ">sys-devel/llvm-${LLVM_VERSION}" >> /etc/portage/package.mask/llvm
+	fi
+
 	emerge -v xorg-x11
 elif [[ "${X}" == "resume" ]] ; then
 	emerge -v --resume

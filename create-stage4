@@ -38,7 +38,7 @@ if [[ "$?" != "0" ]] ; then
 	echo 'dev-util/pkgconfig internal-glib' >> /etc/portage/package.use/pkgconfig
 fi
 
-grep "sys-apps/help2man -nls" /etc/portage/package.use/pkgconfig > /dev/null
+grep "sys-apps/help2man -nls" /etc/portage/package.use/help2man > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "adding use sys-apps/help2man -nls to fix circular dependency"
 	touch /etc/portage/package.use/help2man
@@ -228,6 +228,20 @@ fi
 echo "emerge xfce4-meta window manager? (y/n)"
 read X
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/xfce4-meta
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/xfce4-meta
+	fi
+
+	grep "x11-libs/gdk-pixbuf X" /etc/portage/package.use/xfce4-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/gdk-pixbuf X"
+		touch /etc/portage/package.use/xfce4-meta
+		echo 'x11-libs/gdk-pixbuf X' >> /etc/portage/package.use/xfce4-meta
+	fi
+
 	emerge -v xfce4-meta
 fi
 

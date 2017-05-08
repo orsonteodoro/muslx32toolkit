@@ -215,7 +215,8 @@ echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-vid
 echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
 read X
 if [[ "${X}" == "y" ]] ; then
-	cp -a configs/20-nouveau.conf /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d
+	cp -a ${MUSLX32_TOOLKIT_FOLDER}/configs/20-nouveau.conf /etc/X11/xorg.conf.d/20-video.conf
 fi
 
 echo "emerge dwm window manager? (y/n)"

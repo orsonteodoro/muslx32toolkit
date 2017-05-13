@@ -39,7 +39,7 @@ Step 11: Perform any additions to your stage4 image
 
 ## Notes
 
-Before running ./create-stage4 you may need to check the existance of make.conf.native make.conf.cross.  If they do not exist, run ./create-stage3 and regenerate the make.conf.cross and make.conf.native.
+Before running ./create-stage4 you may need to check the existance of make.conf.native make.conf.cross in your /etc/portage folder.  If they do not exist, chroot out and run ./create-stage3 and regenerate the make.conf.cross and make.conf.native.  Then chroot back in the /usr/<profile> or through ./create-stage3 script
 
 ## License
 

@@ -95,8 +95,9 @@ fi
 echo "emerge system? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 echo "full does a full emerge of the system"
 echo "resume continues where emerge system left off"
-echo "note: some packages require you to drop chroot and run fixstage4.  packages that require running fixstage4: baselayout, coreutils, perl, libtool, iniparser, iptables, procps, readline, mpfr, libnl, m2crypto"
-echo "specifically:"
+echo "skipfirstresme continues where emerge system left off but skips the package in the resume queue"
+echo "note: some packages require you to drop chroot and run fixstage4.  packages that may require running fixstage4: mpfr, gettext (if systemwide nls is enabled), llvm"
+echo "note: you should edit your /etc/make.conf.native at this point"
 echo "note: failed native baselayout requires compiled baselayout."
 echo "note: failed native coreutils requires cross compiled coreutils."
 echo "note: failed native perl requires cross compiled mpfr."
@@ -242,6 +243,21 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'x11-libs/gdk-pixbuf X' >> /etc/portage/package.use/xfce4-meta
 	fi
 
+	grep "dev-libs/boehm-gc threads" /etc/portage/package.use/xfce4-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/boehm-gc threads"
+		touch /etc/portage/package.use/xfce4-meta
+		echo 'dev-libs/boehm-gc threads' >> /etc/portage/package.use/xfce4-meta
+	fi
+
+	grep "=dev-scheme/guile-${GUILE_VERSION}" /etc/portage/package.keywords/xfce4-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "keywording =dev-scheme/guile-${GUILE_VERSION}"
+		mkdir -p /etc/portage/package.keywords/
+		touch /etc/portage/package.keywords/xfce4-meta
+		echo "=dev-scheme/guile-${GUILE_VERSION} **" >> /etc/portage/package.keywords/xfce4-meta
+	fi
+
 	emerge -v xfce4-meta
 fi
 
@@ -346,26 +362,6 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'media-video/ffmpeg cpu_flags_x86_mmxext' >> /etc/portage/package.use/mplayer
 	fi
 
-	#update: compiles fine with simd
-	#echo "masking simd for mplayer"
-	#grep "media-video/mplayer -cpu_flags_x86_mmxext" /etc/portage/package.use/mplayer > /dev/null
-	#if [[ "$?" != "0" ]] ; then
-	#	echo "adding use media-video/mplayer -cpu_flags_x86_mmxext"
-	#	echo 'media-video/mplayer -cpu_flags_x86_mmxext' >> /etc/portage/package.use/mplayer
-	#fi
-
-	#grep "media-video/mplayer -cpu_flags_x86_sse" /etc/portage/package.use/mplayer > /dev/null
-	#if [[ "$?" != "0" ]] ; then
-	#	echo "adding use media-video/mplayer -cpu_flags_x86_sse"
-	#	echo 'media-video/mplayer -cpu_flags_x86_sse' >> /etc/portage/package.use/mplayer
-	#fi
-
-	#grep "media-video/mplayer -cpu_flags_x86_sse2" /etc/portage/package.use/mplayer > /dev/null
-	#if [[ "$?" != "0" ]] ; then
-	#	echo "adding use media-video/mplayer -cpu_flags_x86_sse2"
-	#	echo 'media-video/mplayer -cpu_flags_x86_sse2' >> /etc/portage/package.use/mplayer
-	#fi
-
 	emerge -v mplayer
 fi
 
@@ -398,6 +394,39 @@ read X
 if [[ "${X}" == "y" ]] ; then
 	emerge -v gdb
 fi
+
+echo "emerge networkmanager (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
+	grep "net-wireless/wpa_supplicant dbus" /etc/portage/package.use/networkmanager > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use net-wireless/wpa_supplicant dbus"
+		echo 'net-wireless/wpa_supplicant dbus' >> /etc/portage/package.use/networkmanager
+	fi
+
+	grep "sys-auth/consolekit policykit" /etc/portage/package.use/networkmanager > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use sys-auth/consolekit policykit"
+		echo 'sys-auth/consolekit policykit' >> /etc/portage/package.use/networkmanager
+	fi
+
+	grep "dev-libs/glib dbus" /etc/portage/package.use/networkmanager > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/glib dbus"
+		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/networkmanager
+	fi
+
+	grep "=dev-lang/spidermonkey-${SPIDERMONKEY_VERSION}" /etc/portage/package.keywords/networkmanager > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "keywording =dev-lang/spidermonkey--${SPIDERMONKEY_VERSION}"
+		mkdir -p /etc/portage/package.keywords/
+		touch /etc/portage/package.keywords/networkmanager
+		echo "=dev-lang/spidermonkey-${SPIDERMONKEY_VERSION} **" >> /etc/portage/package.keywords/networkmanager
+	fi
+
+	emerge -v networkmanager
+fi
+
 
 echo "set root password? (yes/no)"
 read X

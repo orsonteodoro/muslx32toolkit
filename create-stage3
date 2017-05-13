@@ -191,21 +191,28 @@ eselect profile set hardened/linux/musl/amd64/x32
 echo "init crossdev target files"
 crossdev -v -S -A x32 --ov-output /usr/local/crossdev --ov-gcc /var/lib/layman/musl --ov-libc /usr/local/muslx32 --g "=${GCC_VERSION}" --l "=${MUSL_VERSION}" --init-target --target ${CROSSDEV_TARGET}
 
-#temporary fix.  seems bugged for some reason
-echo "copying ${MUSLX32_TOOLKIT_FOLDER}/make.conf to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.  it will override your changes."
-mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage
-cp ${MUSLX32_TOOLKIT_FOLDER}/make.conf  /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
-sed -i -e "s|__CHOST__|${___CHOST___}|g" -e "s|__CBUILD__|${___CBUILD___}|g" -e "s|__ARCH__|${___ARCH___}|g" make.conf -e "s|__LIBC__|${___LIBC___}|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+echo "copy/override /usr/${CROSSDEV_TARGET}/etc/portage/make.conf? (y/n)"
+echo "note: this will be later renamed to make.conf.cross"
+read X
+if [[ "${X}" == "y" ]] ; then
+	#temporary fix.  seems bugged for some reason
+	echo "copying ${MUSLX32_TOOLKIT_FOLDER}/make.conf to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.  it will override your changes."
+	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage
+	rm /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+	cp ${MUSLX32_TOOLKIT_FOLDER}/make.conf  /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+	sed -i -e "s|__CHOST__|${___CHOST___}|g" -e "s|__CBUILD__|${___CBUILD___}|g" -e "s|__ARCH__|${___ARCH___}|g" make.conf -e "s|__LIBC__|${___LIBC___}|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 
-echo "remove ~${___ARCH___} from ACCEPT_KEYWORDS of the crossdev profile if any? (y/n)"
+	echo "patching /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
+	sed -i -e "s|__LIBC__|musl|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+echo "remove (or reapply) the ~${___ARCH___} from ACCEPT_KEYWORDS to (/usr/${CROSSDEV_TARGET}/etc/portage/make.conf? (y/n)"
+echo "note: it is strongly recommended you put y here because ~${___ARCH___} is not supported."
 read X
 if [[ "${X}" == "y" ]] ; then
 	echo "removing ~${___ARCH___} ACCEPT_KEYWORDS"
 	A="~${___ARCH___}" B="" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 fi
-
-echo "patching /usr/${CROSSDEV_TARGET}/etc/portage/make.conf"
-sed -i -e "s|__LIBC__|musl|g" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 
 grep "cross-${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" /etc/portage/package.use/gcc > /dev/null
 if [[ "$?" != 0 ]] ; then
@@ -225,12 +232,21 @@ fi
 echo "copy emerge bashrc fix? (y/n)"
 read X
 if [[ "$X" == "y" ]] ; then
-	cp -a ${MUSLX32_TOOLKIT_FOLDER}/bashrc /usr/${CROSSDEV_TARGET}/etc/portage
+	cp -a ${MUSLX32_TOOLKIT_FOLDER}/muslx32_makefile_patcher /usr/${CROSSDEV_TARGET}/etc/portage/
+        touch /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+        grep 'source ${EROOT}/etc/portage/muslx32_makefile_patcher' /usr/${CROSSDEV_TARGET}/etc/portage/bashrc > /dev/null
+        if [[ "$?" != "0" ]] ; then
+            echo 'if [ -f "${EROOT}/etc/portage/muslx32_makefile_patcher" ]; then' >> /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+            echo '	source ${EROOT}/etc/portage/muslx32_makefile_patcher' >> /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+            echo 'elif [ -f "/usr/${CHOST}/etc/portage/muslx32_makefile_patcher" ]; then' >> /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+            echo '	source /usr/${CHOST}/etc/portage/muslx32_makefile_patcher' >> /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+            echo 'fi' >> /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
+        fi
 fi
 
 echo "creating symlink to profile for new crossdev profile"
 cd /usr/${CROSSDEV_TARGET}/etc/portage
-rm make.profile{,.orig}
+rm make.profile{,.orig} > /dev/null
 ln -s /usr/portage/profiles/hardened/linux/musl/amd64/x32 ./make.profile
 #ln -s /usr/portage/profiles/embedded ./make.profile.orig
 
@@ -334,7 +350,7 @@ if [[ "$?" != "0" ]] ; then
 	echo "sys-apps/portage::gentoo" >> /usr/${CROSSDEV_TARGET}/etc/portage/package.mask/portage
 fi
 
-grep "${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" /usr/${CROSSDEV_TARGET}/etc/portage/package.use/gcc > /dev/null
+grep "sys-devel/gcc -vtv -fortran -sanitize" /usr/${CROSSDEV_TARGET}/etc/portage/package.use/gcc > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "Masking use flags for crossdev profile's gcc: -vtv -fortran -sanitize"
 	mkdir -p /usr/${CROSSDEV_TARGET}/etc/portage/package.use
@@ -346,13 +362,6 @@ echo "forcing MAKEOPTS=\"-j1\""
 grep "MAKEOPTS=" /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 if [[ "$?" != "0" ]] ; then
 	echo 'MAKEOPTS="-j1" #muslx32 does not support MAKEOPTS>1 do not change' >> /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
-fi
-
-echo "remove ~${___ARCH___} from ACCEPT_KEYWORDS of the crossdev profile if any? (y/n)"
-read X
-if [[ "${X}" == "y" ]] ; then
-	echo "removing ~${___ARCH___} ACCEPT_KEYWORDS"
-	A="~${___ARCH___}" B="" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 fi
 
 grep "=sys-devel/gcc-${GCC_VERSION}" /usr/${CROSSDEV_TARGET}/etc/portage/package.keywords/gcc > /dev/null
@@ -418,13 +427,13 @@ if [[ "$?" != "0" ]] ; then
 fi
 
 
-echo "use cross toolchain to build crossdev profile's system? (all/resume/skip)"
-echo "all will execute: ${CROSSDEV_TARGET}-emerge -ve system."
+echo "use cross toolchain to build crossdev profile's system? (full/resume/skip)"
+echo "full will execute: ${CROSSDEV_TARGET}-emerge -ve system."
 echo "resume will execute: ${CROSSDEV_TARGET}-emerge -v --resume."
 echo "skip will go on to the next step."
-echo "before you press anyting, you may want to edit /usr/${CROSSDEV_TARGET}/etc/portage/make.conf to set the cflags or any use flags."
+echo "before you press anyting, you may want to (re)edit /usr/${CROSSDEV_TARGET}/etc/portage/make.conf to set the cflags or any use flags."
 read X
-if [[ "$X" == "all" ]] ; then
+if [[ "$X" == "full" ]] ; then
 	#${CROSSDEV_TARGET}-emerge -1Ov =zlib-${ZLIB_VERSION}
 	#${CROSSDEV_TARGET}-emerge -1Ov =openssl-${OPENSSL_VERSION}
 	${CROSSDEV_TARGET}-emerge -ve system
@@ -460,11 +469,14 @@ if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/portage" ] ; then
 	cp -a /usr/portage /usr/${CROSSDEV_TARGET}/usr/
 fi
 
-if [ ! -f "/usr/${CROSSDEV_TARGET}/etc/portage/make.conf.cross" ] ; then
+echo "copy/override /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native; and also move make.conf to make.conf.cross; and also symlink make.conf.native to make.conf? (y/n)"
+read X
+if [[ "${X}" == "y" ]] ; then
 	cd /usr/${CROSSDEV_TARGET}/etc/portage/
 	echo "move old make.conf to make.conf.cross"
 	mv /usr/${CROSSDEV_TARGET}/etc/portage/make.conf /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.cross
 	echo "generating new make.conf.native"
+	rm make.conf.native
 	touch make.conf.native
 	echo 'CFLAGS="-O2 -pipe -fomit-frame-pointer"' >> make.conf.native
 	echo 'CXXFLAGS="${CFLAGS}"' >> make.conf.native
@@ -484,6 +496,7 @@ if [ ! -f "/usr/${CROSSDEV_TARGET}/etc/portage/make.conf.cross" ] ; then
 	echo 'PORTDIR_OVERLAY="${PORTDIR_OVERLAY} /var/lib/layman/musl"' >> make.conf.native
 	echo 'MAKEOPTS="-j1" #muslx32 does not support MAKEOPTS>1 do not change' >> make.conf.native
 	echo "symlinking make.conf.native to make.conf"
+	rm make.conf
 	ln -s make.conf.native make.conf
 	echo "change symlink of make.conf to make.conf.cross to use the cross compiler.  this is useful for developing the musl library."
 	echo "change symlink of make.conf to make.conf.native to use the native compiler for the ${CROSSDEV_TARGET} profile.  this is the default."

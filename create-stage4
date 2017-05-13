@@ -96,19 +96,7 @@ echo "emerge system? this is to test if portage and the stage 3 image is properl
 echo "full does a full emerge of the system"
 echo "resume continues where emerge system left off"
 echo "skipfirstresme continues where emerge system left off but skips the package in the resume queue"
-echo "note: some packages require you to drop chroot and run fixstage4.  packages that may require running fixstage4: mpfr, gettext (if systemwide nls is enabled), llvm"
 echo "note: you should edit your /etc/make.conf.native at this point"
-echo "note: failed native baselayout requires compiled baselayout."
-echo "note: failed native coreutils requires cross compiled coreutils."
-echo "note: failed native perl requires cross compiled mpfr."
-echo "note: failed native libtool requires cross compiled libtool."
-echo "note: failed native iniparser requires cross compiled iniparser."
-echo "note: failed native iptables requires cross compiled iptables."
-echo "note: failed native procps requires cross compiled readline."
-echo "note: debug spew complaining about readline requires cross compiled readline.."
-echo "note: gcc failure with internal compiler error: Segmentation fault? or with cracklib means try emerging mpfr."
-echo "note: failed native libnl requires cross compiled libnl."
-echo "note: failed native m2crypto requires cross compiled m2crypto."
 read X
 if [[ "${X}" == "full" ]] ; then
 	emerge -ve system

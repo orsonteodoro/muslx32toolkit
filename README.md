@@ -19,11 +19,11 @@ Step 4: Run ./build-crossdev-toolchain `<full-path-containing-both-stage3-and-po
 
 (chroot)
 
-Step 5: Run ./create-stage3
+Step 5: Run ./create-stage3 in muslx32toolkit
 
 (chroot)
 
-Step 6: Run ./create-stage4
+Step 6: Run ./create-stage4 in muslx32toolkit
 
 (chroot)
 
@@ -36,6 +36,10 @@ Step 9: Add users
 Step 10: Add root password
 
 Step 11: Perform any additions to your stage4 image
+
+## Notes
+
+Before running ./create-stage4 you may need to check the existance of make.conf.native make.conf.cross.  If they do not exist, run ./create-stage3 and regenerate the make.conf.cross and make.conf.native.
 
 ## License
 

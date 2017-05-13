@@ -27,17 +27,15 @@ Step 6: Run ./create-stage4
 
 (chroot)
 
-Step 7: Run ./fixstage4 corrective script if in the step 6's create-stage4 script fails then repeat step 7
+Step 7: Modify /etc/fstab
 
-Step 8: Modify /etc/fstab
+Step 8: Modify bootloader and install it
 
-Step 9: Modify bootloader and install it
+Step 9: Add users
 
-Step 10: Add users
+Step 10: Add root password
 
-Step 11: Add root password
-
-Step 12: Perform any additions to your stage4 image
+Step 11: Perform any additions to your stage4 image
 
 ## License
 

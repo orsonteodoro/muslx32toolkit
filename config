@@ -38,9 +38,7 @@ FIREFOX_VERSION="45.4.0"
 GUILE_VERSION="2.0.14"
 SPIDERMONKEY_VERSION="1.8.5-r5"
 
-PYTHON_MASK1="2.7.12"
-
-MY_CFLAGS='-Os -pipe -fomit-frame-pointer'
+MY_CFLAGS='-O2 -pipe -fomit-frame-pointer'
 
 LLVM_VERSION="3.8.1-r2" #3.9.1 and above is broken
 PYTHON_2_VERSION="2.7"

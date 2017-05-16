@@ -7,7 +7,13 @@ note: The scripts rely on stable packages.  ~amd64 keyworded packages are not su
 
 The scripts use an interactive checkpoint system so you can edit and return back to that step them if they fail.  You may need to edit the config file to properly edit packages to unmask or and use, or specific files/versions to use.
 
-Step 0: Download the stage3 tarball and the portage snapshot described in the config file from a Gentoo mirror.  It is important that you make sure you download the files in a folder that is either a mounted partition or a new folder.
+## Instructions
+
+Step 0.0: Download the stage3 tarball and the portage snapshot described in the config file from a Gentoo mirror.  It is important that you make sure you download the files in a folder that is either a mounted partition or a new folder.
+
+Step 0.1: Edit the config file so that you choose the right cflags.  You may need to edit the bash scripts and config file to apply custom masks/unmasks/keywords.
+
+Step 0.2: Edit the config_unattended to choose either prompt or unattended mode.  Unattended mode may break if your connection is not always on, internet disruption, or newer updated stable packages which muslx32 patches were not applied.  Currently, there is no resume feature in unattended mode, so it requires editing to resume.
 
 Step 1: chmod +x prepare
 
@@ -38,8 +44,6 @@ Step 10: Add root password
 Step 11: Perform any additions to your stage4 image
 
 ## Notes
-
-Before running ./create-stage4 you may need to check the existance of make.conf.native make.conf.cross in your /etc/portage folder.  If they do not exist, chroot out and run ./create-stage3 and regenerate the make.conf.cross and make.conf.native.  Then chroot back in the /usr/<profile> or through ./create-stage3 script
 
 The script relies on the following Portage overlays which the create-stage3 script will clone and unmask:
 * https://github.com/orsonteodoro/muslx32

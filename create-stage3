@@ -23,24 +23,33 @@ MUSLX32_TOOLKIT_FOLDER=`pwd -P`
 popd > /dev/null
 
 source ${MUSLX32_TOOLKIT_FOLDER}/config
+source ${MUSLX32_TOOLKIT_FOLDER}/config_unattended
+
+mx32_prompt() {
+	if [[ "${X_mode}" == "prompt" ]] ; then
+		read X
+	else
+		X="$1"
+	fi
+}
 
 echo "This script (create-stage3) should be in the muslx32toolkit folder.  The muslx32roolkit folder should be in the same folder placed along side of the two tarballs (stage3 and portage snapshot).  the two tarballs should be at the root, if not chroot."
 echo "Each decision is a checkpoint.  Checkpoints allow you to continue where you left off and make corrections to this script."
 
 echo "portage sync on crossdev-root? (y/n)"
-read X
+mx32_prompt "${X_1}"
 if [[ "$X" == "y" ]] ; then
 	emerge --sync
 fi
 
 echo "emerge portage on crosdev-root? (y/n)"
-read X
+mx32_prompt "${X_2}"
 if [[ "$X" == "y" ]] ; then
 	emerge portage
 fi
 
 echo "apply package.mask for layman to emerge properly? (y/n)"
-read X
+mx32_prompt "${X_3}"
 if [[ "$X" == "y" ]] ; then
 	mkdir -p /etc/portage/package.mask
 	touch /etc/portage/package.mask/layman
@@ -71,20 +80,20 @@ if [[ "$X" == "y" ]] ; then
 fi
 
 echo "emerge layman on crossdev-root? (y/n)"
-read X
+mx32_prompt "${X_4}"
 if [[ "$X" == "y" ]] ; then
 	emerge layman
 fi
 
 echo "emerge crossdev on crossdev-root? (y/n)"
-read X
+mx32_prompt "${X_5}"
 if [[ "$X" == "y" ]] ; then
 	emerge crossdev
 fi
 
 echo "what to do with the musl overlay on crossdev-root? (clone/update/skip)"
 echo "clone means new download."
-read X
+mx32_prompt "${X_6}"
 if [[ "$X" == "clone" ]] ; then
 	layman -L
 	layman -a musl
@@ -102,7 +111,7 @@ echo "crossdev" > /usr/local/crossdev/profiles/repo_name
 
 echo "what to do with the musl-extras overlay on crossdev-root? (clone/update/skip)"
 echo "clone means new download."
-read X
+mx32_prompt "${X_7}"
 if [[ "$X" == "clone" ]] ; then
 	cd /usr/local
 	git clone "https://github.com/lluixhi/musl-extras.git"
@@ -113,7 +122,7 @@ fi
 
 echo "what to do with the muslx32 overlay on crossdev-root? (clone/update/skip)"
 echo "clone means new download."
-read X
+mx32_prompt "${X_8}"
 if [[ "$X" == "clone" ]] ; then
 	cd /usr/local
 	git clone "https://github.com/orsonteodoro/muslx32.git"
@@ -193,7 +202,7 @@ crossdev -v -S -A x32 --ov-output /usr/local/crossdev --ov-gcc /var/lib/layman/m
 
 echo "copy/override /usr/${CROSSDEV_TARGET}/etc/portage/make.conf? (y/n)"
 echo "note: this will be later renamed to make.conf.cross"
-read X
+mx32_prompt "${X_9}"
 if [[ "${X}" == "y" ]] ; then
 	#temporary fix.  seems bugged for some reason
 	echo "copying ${MUSLX32_TOOLKIT_FOLDER}/make.conf to /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.  it will override your changes."
@@ -208,10 +217,17 @@ fi
 
 echo "remove (or reapply) the ~${___ARCH___} from ACCEPT_KEYWORDS to (/usr/${CROSSDEV_TARGET}/etc/portage/make.conf? (y/n)"
 echo "note: it is strongly recommended you put y here because ~${___ARCH___} is not supported."
-read X
+mx32_prompt "${X_10}"
 if [[ "${X}" == "y" ]] ; then
 	echo "removing ~${___ARCH___} ACCEPT_KEYWORDS"
 	A="~${___ARCH___}" B="" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
+fi
+
+echo "change cflags for /usr/${CROSSDEV_TARGET}/etc/portage/make.conf? (y/n)"
+mx32_prompt "${X_10a}"
+if [[ "${X}" == "y" ]] ; then
+	echo "MY_CFLAGS is ${MY_CFLAGS}"
+	A='-O2 -pipe -fomit-frame-pointer' B="${MY_CFLAGS}" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf
 fi
 
 grep "cross-${CROSSDEV_TARGET}/gcc -vtv -fortran -sanitize" /etc/portage/package.use/gcc > /dev/null
@@ -224,13 +240,13 @@ if [[ "$?" != 0 ]] ; then
 fi
 
 echo "grab and build muslx32 cross toolchain? (y/n)"
-read X
+mx32_prompt "${X_11}"
 if [[ "$X" == "y" ]] ; then
 	crossdev -v -S -A x32 --ov-output /usr/local/crossdev --ov-gcc /var/lib/layman/musl --ov-libc /usr/local/muslx32 --g "=${GCC_VERSION}" --l "=${MUSL_VERSION}" --target ${CROSSDEV_TARGET}
 fi
 
 echo "copy emerge bashrc fix? (y/n)"
-read X
+mx32_prompt "${X_12}"
 if [[ "$X" == "y" ]] ; then
 	cp -a ${MUSLX32_TOOLKIT_FOLDER}/muslx32_makefile_patcher /usr/${CROSSDEV_TARGET}/etc/portage/
         touch /usr/${CROSSDEV_TARGET}/etc/portage/bashrc
@@ -273,7 +289,7 @@ mount -t proc proc proc
 mount --bind /dev dev #urandom fix
 
 echo "add cross compile kernel script?  It will be called xkmake (y/n)"
-read X
+mx32_prompt "${X_13}"
 if [[ "$X" == "y" ]] ; then
 	cd /
 	mkdir -p /usr/${CROSSDEV_TARGET}/usr/src
@@ -432,7 +448,7 @@ echo "full will execute: ${CROSSDEV_TARGET}-emerge -ve system."
 echo "resume will execute: ${CROSSDEV_TARGET}-emerge -v --resume."
 echo "skip will go on to the next step."
 echo "before you press anyting, you may want to (re)edit /usr/${CROSSDEV_TARGET}/etc/portage/make.conf to set the cflags or any use flags."
-read X
+mx32_prompt "${X_14}"
 if [[ "$X" == "full" ]] ; then
 	#${CROSSDEV_TARGET}-emerge -1Ov =zlib-${ZLIB_VERSION}
 	#${CROSSDEV_TARGET}-emerge -1Ov =openssl-${OPENSSL_VERSION}
@@ -470,7 +486,7 @@ if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/portage" ] ; then
 fi
 
 echo "copy/override /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native; and also move make.conf to make.conf.cross; and also symlink make.conf.native to make.conf? (y/n)"
-read X
+mx32_prompt "${X_15}"
 if [[ "${X}" == "y" ]] ; then
 	cd /usr/${CROSSDEV_TARGET}/etc/portage/
 	echo "move old make.conf to make.conf.cross"
@@ -502,14 +518,23 @@ if [[ "${X}" == "y" ]] ; then
 	echo "change symlink of make.conf to make.conf.native to use the native compiler for the ${CROSSDEV_TARGET} profile.  this is the default."
 fi
 
+echo "change cflags for /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native? (y/n)"
+mx32_prompt "${X_15a}"
+if [[ "${X}" == "y" ]] ; then
+	echo "MY_CFLAGS is ${MY_CFLAGS}"
+	A='-O2 -pipe -fomit-frame-pointer' B="${MY_CFLAGS}" perl -p -i -e 's|\Q$ENV{'A'}\E|$ENV{'B'}|g' /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native
+fi
+
 echo "copying muslx32toolkit folder into /usr/${CROSSDEV_TARGET}"
 cp -a ${MUSLX32_TOOLKIT_FOLDER} /usr/${CROSSDEV_TARGET}
 
-echo "chroot into crossdev profile? (y/n)"
+echo "chroot into crossdev profile? (y/n/chroot-and-autorun-next-script)"
 echo "you should run create-stage4 after chrooting to fix any problems"
-read X
+mx32_prompt "${X_16}"
 if [[ "$X" == "y" ]] ; then
 	echo "chrooting..."
 	chroot /usr/${CROSSDEV_TARGET} /bin/bash
-	#chroot . /bin/bash -c "muslx32toolkit/create-stage4" #uncomment and comment above line to automate
+elif [[ "${X}" == "chroot-and-autorun-next-script" ]] ; then
+	echo "chrooting and running create-stage4..."
+	chroot /usr/${CROSSDEV_TARGET} /bin/bash -c "muslx32toolkit/create-stage4"
 fi

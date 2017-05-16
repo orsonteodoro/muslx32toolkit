@@ -23,6 +23,15 @@ MUSLX32_TOOLKIT_FOLDER=`pwd -P`
 popd > /dev/null
 
 source ${MUSLX32_TOOLKIT_FOLDER}/config
+source ${MUSLX32_TOOLKIT_FOLDER}/config_unattended
+
+mx32_prompt() {
+	if [[ "${X_mode}" == "prompt" ]] ; then
+		read X
+	else
+		X="$1"
+	fi
+}
 
 CROSSDEV_ROOT="$1"
 
@@ -52,14 +61,13 @@ if [ ! -f "${CROSSDEV_ROOT}/${PORTAGE_SNAPSHOT_TARBALL}" ] ; then
 fi
 
 echo "Unpack ${STAGE3_TARBALL} (y/n)"
-read X
+mx32_prompt "${X_0a}"
 if [[ "$X" == "y" ]] ; then
 	tar -xvf ${CROSSDEV_ROOT}/${STAGE3_TARBALL}
 fi
 
 echo "Unpack ${PORTAGE_SNAPSHOT_TARBALL} (y/n)"
-read X
-
+mx32_prompt "${X_0b}"
 if [[ "$X" == "y" ]] ; then
 	tar -xvf ${CROSSDEV_ROOT}/${PORTAGE_SNAPSHOT_TARBALL}
 fi
@@ -73,13 +81,15 @@ mount -t proc proc proc
 echo "Copying resolv.conf to etc"
 cp /etc/resolv.conf etc
 
-echo "chroot into crossdev toolchain root? (y/n)"
+echo "chroot into crossdev toolchain root? (y/n/chroot-and-autorun-next-script)"
 echo "you need to execute the create-stage3 manually if you decide to chroot"
-read X
+mx32_prompt "${X_0c}"
 if [[ "$X" == "y" ]] ; then
 	echo "Chrooting..."
-	chroot . /bin/bash
-#	chroot . /bin/bash -c "muslx32toolkit/create-stage3" #uncomment and comment above line to automate
+	chroot "${CROSSDEV_ROOT}" /bin/bash
+elif [[ "${X}" == "chroot-and-autorun-next-script" ]] ; then
+	echo "Chrooting then running create-stage3..."
+	chroot "${CROSSDEV_ROOT}" /bin/bash -c "muslx32toolkit/create-stage3"
 fi
 
 #echo "folder is ${MUSLX32_TOOLKIT_FOLDER}"

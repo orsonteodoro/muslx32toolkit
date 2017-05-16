@@ -46,3 +46,4 @@ cd usr/${CROSSDEV_TARGET}
 mount --bind /dev dev
 mount -t proc proc proc
 
+echo "done"

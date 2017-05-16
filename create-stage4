@@ -23,6 +23,15 @@ MUSLX32_TOOLKIT_FOLDER=`pwd -P`
 popd > /dev/null
 
 source ${MUSLX32_TOOLKIT_FOLDER}/config
+source ${MUSLX32_TOOLKIT_FOLDER}/config_unattended
+
+mx32_prompt() {
+	if [[ "${X_mode}" == "prompt" ]] ; then
+		read X
+	else
+		X="$1"
+	fi
+}
 
 echo "this script (create-stage4) should exist in the muslx32toolkit folder of the crossdev-profile root.  if not, chroot into the crossdev profile."
 
@@ -105,7 +114,7 @@ echo "full does a full emerge of the system"
 echo "resume continues where emerge system left off"
 echo "skipfirstresme continues where emerge system left off but skips the package in the resume queue"
 echo "note: you should edit your /etc/portage/make.conf.native at this point"
-read X
+mx32_prompt "${X_17}"
 if [[ "${X}" == "full" ]] ; then
 	emerge -ve system
 elif [[ "${X}" == "resume" ]] ; then
@@ -117,7 +126,7 @@ fi
 
 echo "emerge world? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 echo "note: same failed dependencies means you need to run fixstage4."
-read X
+mx32_prompt "${X_18}"
 if [[ "${X}" == "full" ]] ; then
 	emerge -ve world
 elif [[ "${X}" == "resume" ]] ; then
@@ -127,7 +136,7 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 fi
 
 echo "emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
-read X
+mx32_prompt "${X_19}"
 if [[ "${X}" == "full" ]] ; then
 	emerge -v wpa_supplicant
 elif [[ "${X}" == "resume" ]] ; then
@@ -137,14 +146,14 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 fi
 
 echo "emerge layman (required to update musl repository)? (y/n)"
-read X
+mx32_prompt "${X_20}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v layman
 fi
 
 
 echo "sync and update musl overlay? (y/n)"
-read X
+mx32_prompt "${X_21}"
 if [[ "${X}" == "y" ]] ; then
 	layman -L
 	layman -a musl
@@ -152,37 +161,37 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge dhcpcd? (y/n)"
-read X
+mx32_prompt "${X_22}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v dhcpcd
 fi
 
 echo "emerge wireless-tools? (y/n)"
-read X
+mx32_prompt "${X_23}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v wireless-tools
 fi
 
 echo "emerge links text user interface web browser? (y/n)"
-read X
+mx32_prompt "${X_24}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v links
 fi
 
 echo "emerge ntp? (y/n)"
-read X
+mx32_prompt "${X_25}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v ntp
 fi
 
 echo "emerge gentoo-sources? (y/n)"
-read X
+mx32_prompt "${X_26}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v gentoo-sources
 fi
 
 echo "emerge xorg-x11? (full/resume/skipfirstresume/skipall)"
-read X
+mx32_prompt "${X_27}"
 if [[ "${X}" == "full" ]] ; then
 	#llvm is required for the xorg-drivers and mesa
 	grep "=sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.keywords/llvm > /dev/null
@@ -210,20 +219,20 @@ fi
 
 echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf (y/n)"
 echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
-read X
+mx32_prompt "${X_28}"
 if [[ "${X}" == "y" ]] ; then
 	mkdir -p /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d
 	cp -a ${MUSLX32_TOOLKIT_FOLDER}/configs/20-nouveau.conf /etc/X11/xorg.conf.d/20-video.conf
 fi
 
 echo "emerge dwm window manager? (y/n)"
-read X
+mx32_prompt "${X_29}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v dwm
 fi
 
 echo "emerge xfce4-meta window manager? (y/n)"
-read X
+mx32_prompt "${X_30}"
 if [[ "${X}" == "y" ]] ; then
 	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-meta > /dev/null
 	if [[ "$?" != "0" ]] ; then
@@ -258,7 +267,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge xfce4-terminal? (y/n)"
-read X
+mx32_prompt "${X_31}"
 if [[ "${X}" == "y" ]] ; then
 	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-terminal > /dev/null
 	if [[ "$?" != "0" ]] ; then
@@ -271,7 +280,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge firefox? (y/n)"
-read X
+mx32_prompt "${X_32}"
 if [[ "${X}" == "y" ]] ; then
 	mkdir -p /etc/portage/package.use/
 	touch /etc/portage/package.use/firefox
@@ -325,31 +334,31 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge alsa-utils? (y/n)"
-read X
+mx32_prompt "${X_33}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v alsa-utils
 fi
 
 echo "emerge leafpad? (y/n)"
-read X
+mx32_prompt "${X_34}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v leafpad
 fi
 
 echo "emerge geany? (y/n)"
-read X
+mx32_prompt "${X_35}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v geany
 fi
 
 echo "emerge lilo (y/n)"
-read X
+mx32_prompt "${X_36}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v lilo
 fi
 
 echo "emerge mplayer (y/n)"
-read X
+mx32_prompt "${X_37}"
 if [[ "${X}" == "y" ]] ; then
 
 	grep "media-video/ffmpeg cpu_flags_x86_mmxext" /etc/portage/package.use/mplayer > /dev/null
@@ -362,7 +371,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge filezilla (y/n)"
-read X
+mx32_prompt "${X_38}"
 if [[ "${X}" == "y" ]] ; then
 	grep "app-text/xmlto text" /etc/portage/package.use/filezilla > /dev/null
 	if [[ "$?" != "0" ]] ; then
@@ -380,19 +389,19 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge strace (y/n)"
-read X
+mx32_prompt "${X_39}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v strace
 fi
 
 echo "emerge gdb (y/n)"
-read X
+mx32_prompt "${X_40}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v gdb
 fi
 
 echo "emerge networkmanager (y/n)"
-read X
+mx32_prompt "${X_41}"
 if [[ "${X}" == "y" ]] ; then
 	grep "net-wireless/wpa_supplicant dbus" /etc/portage/package.use/networkmanager > /dev/null
 	if [[ "$?" != "0" ]] ; then
@@ -425,8 +434,8 @@ fi
 
 
 echo "set root password? (yes/no)"
-read X
-if [[ "${X}" == "yes" ]] ; then
+mx32_prompt "${X_42}"
+if [[ "${X}" == "y" ]] ; then
 	passwd
 fi
 

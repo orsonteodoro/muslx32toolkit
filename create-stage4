@@ -421,6 +421,12 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/networkmanager
 	fi
 
+	grep "net-misc/networkmanager -introspection" /etc/portage/package.use/networkmanager > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use net-misc/networkmanager -introspection"
+		echo 'net-misc/networkmanager -introspection' >> /etc/portage/package.use/networkmanager
+	fi
+
 	grep "=dev-lang/spidermonkey-${SPIDERMONKEY_VERSION}" /etc/portage/package.keywords/networkmanager > /dev/null
 	if [[ "$?" != "0" ]] ; then
 		echo "keywording =dev-lang/spidermonkey--${SPIDERMONKEY_VERSION}"

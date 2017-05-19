@@ -438,11 +438,34 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v networkmanager
 fi
 
-
 echo "set root password? (yes/no)"
 mx32_prompt "${X_42}"
 if [[ "${X}" == "y" ]] ; then
 	passwd
+fi
+
+echo "emerge gparted (y/n)"
+mx32_prompt "${X_43}"
+if [[ "${X}" == "y" ]] ; then
+	grep "sys-block/gparted btrfs dmraid f2fs fat hfs jfs mdadm ntfs reiser4 reiserfs xfs" /etc/portage/package.use/gparted > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use sys-block/gparted btrfs dmraid f2fs fat hfs jfs mdadm ntfs reiser4 reiserfs xfs"
+		echo 'sys-block/gparted btrfs dmraid f2fs fat hfs jfs mdadm ntfs reiser4 reiserfs xfs' >> /etc/portage/package.use/gparted
+	fi
+
+	grep "dev-cpp/cairomm X" /etc/portage/package.use/gparted > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-cpp/cairomm X"
+		echo 'dev-cpp/cairomm X' >> /etc/portage/package.use/gparted
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/gparted > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/gparted
+	fi
+
+	emerge -v gparted
 fi
 
 echo "checklist of things to still do:"

@@ -136,6 +136,7 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 fi
 
 echo "emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
+echo "purpose: for encrypted wifi"
 mx32_prompt "${X_19}"
 if [[ "${X}" == "full" ]] ; then
 	emerge -v wpa_supplicant
@@ -146,6 +147,7 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 fi
 
 echo "emerge layman (required to update musl repository)? (y/n)"
+echo "purpose: adds additional 3rd party gentoo community overlays"
 mx32_prompt "${X_20}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v layman
@@ -153,6 +155,7 @@ fi
 
 
 echo "sync and update musl overlay? (y/n)"
+echo "purpose: properly add musl overlay to stage4 image"
 mx32_prompt "${X_21}"
 if [[ "${X}" == "y" ]] ; then
 	layman -L
@@ -161,36 +164,42 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge dhcpcd? (y/n)"
+echo "purpose: automatic ip address resolution"
 mx32_prompt "${X_22}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v dhcpcd
 fi
 
 echo "emerge wireless-tools? (y/n)"
+echo "purpose: wifi management tools"
 mx32_prompt "${X_23}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v wireless-tools
 fi
 
 echo "emerge links text user interface web browser? (y/n)"
+echo "purpose: html4 text based browser used for getting linux support on the world wide web"
 mx32_prompt "${X_24}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v links
 fi
 
 echo "emerge ntp? (y/n)"
+echo "purpose: atomic clock time syncronization"
 mx32_prompt "${X_25}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v ntp
 fi
 
 echo "emerge gentoo-sources? (y/n)"
+echo "purpose: the linux kernel"
 mx32_prompt "${X_26}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v gentoo-sources
 fi
 
 echo "emerge xorg-x11? (full/resume/skipfirstresume/skipall)"
+echo "purpose: a server for windowed environments which all desktop environments sit on top of"
 mx32_prompt "${X_27}"
 if [[ "${X}" == "full" ]] ; then
 	#llvm is required for the xorg-drivers and mesa
@@ -219,6 +228,7 @@ fi
 
 echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf (y/n)"
 echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
+echo "purpose: fix for musl to load modules"
 mx32_prompt "${X_28}"
 if [[ "${X}" == "y" ]] ; then
 	mkdir -p /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d
@@ -226,12 +236,14 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge dwm window manager? (y/n)"
+echo "purpose: a lightweight desktop environment for fullscreen everything"
 mx32_prompt "${X_29}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v dwm
 fi
 
 echo "emerge xfce4-meta window manager? (y/n)"
+echo "purpose: a lightweight desktop environment"
 mx32_prompt "${X_30}"
 if [[ "${X}" == "y" ]] ; then
 	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-meta > /dev/null
@@ -267,6 +279,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge xfce4-terminal? (y/n)"
+echo "purpose: a terminal in desktop windowed environments"
 mx32_prompt "${X_31}"
 if [[ "${X}" == "y" ]] ; then
 	grep "x11-libs/cairo X" /etc/portage/package.use/xfce4-terminal > /dev/null
@@ -280,6 +293,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge firefox? (y/n)"
+echo "purpose: support for html5 webpages"
 mx32_prompt "${X_32}"
 if [[ "${X}" == "y" ]] ; then
 	mkdir -p /etc/portage/package.use/
@@ -334,30 +348,35 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge alsa-utils? (y/n)"
+echo "purpose: access software audio mixer controls through the console"
 mx32_prompt "${X_33}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v alsa-utils
 fi
 
 echo "emerge leafpad? (y/n)"
+echo "purpose: a desktop based text editor and for note taking"
 mx32_prompt "${X_34}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v leafpad
 fi
 
 echo "emerge geany? (y/n)"
+echo "purpose: a programmer text editor with intellisense and color themes"
 mx32_prompt "${X_35}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v geany
 fi
 
 echo "emerge lilo (y/n)"
+echo "purpose: to install a bootloader"
 mx32_prompt "${X_36}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v lilo
 fi
 
 echo "emerge mplayer (y/n)"
+echo "purpose: use to connect to online radio streams"
 mx32_prompt "${X_37}"
 if [[ "${X}" == "y" ]] ; then
 
@@ -371,6 +390,7 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge filezilla (y/n)"
+echo "purpose: a desktop based client for connecting to ftp servers with resume and queue functionality."
 mx32_prompt "${X_38}"
 if [[ "${X}" == "y" ]] ; then
 	grep "app-text/xmlto text" /etc/portage/package.use/filezilla > /dev/null
@@ -389,18 +409,21 @@ if [[ "${X}" == "y" ]] ; then
 fi
 
 echo "emerge strace (y/n)"
+echo "purpose: for debugging syscalls or functions that interact with the kernel functions api"
 mx32_prompt "${X_39}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v strace
 fi
 
 echo "emerge gdb (y/n)"
+echo "purpose: for debugging c, c++, assembly programs line by line"
 mx32_prompt "${X_40}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v gdb
 fi
 
 echo "emerge networkmanager (y/n)"
+echo "purpose: for connecting to wifi networks.  it has a text user interface for setting up your connection."
 mx32_prompt "${X_41}"
 if [[ "${X}" == "y" ]] ; then
 	grep "net-wireless/wpa_supplicant dbus" /etc/portage/package.use/networkmanager > /dev/null
@@ -421,12 +444,6 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/networkmanager
 	fi
 
-	grep "net-misc/networkmanager -introspection" /etc/portage/package.use/networkmanager > /dev/null
-	if [[ "$?" != "0" ]] ; then
-		echo "adding use net-misc/networkmanager -introspection"
-		echo 'net-misc/networkmanager -introspection' >> /etc/portage/package.use/networkmanager
-	fi
-
 	grep "=dev-lang/spidermonkey-${SPIDERMONKEY_VERSION}" /etc/portage/package.keywords/networkmanager > /dev/null
 	if [[ "$?" != "0" ]] ; then
 		echo "keywording =dev-lang/spidermonkey--${SPIDERMONKEY_VERSION}"
@@ -438,13 +455,8 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v networkmanager
 fi
 
-echo "set root password? (yes/no)"
-mx32_prompt "${X_42}"
-if [[ "${X}" == "y" ]] ; then
-	passwd
-fi
-
 echo "emerge gparted (y/n)"
+echo "purpose: a graphical partition manager"
 mx32_prompt "${X_43}"
 if [[ "${X}" == "y" ]] ; then
 	grep "sys-block/gparted btrfs dmraid f2fs fat hfs jfs mdadm ntfs reiser4 reiserfs xfs" /etc/portage/package.use/gparted > /dev/null
@@ -468,10 +480,712 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v gparted
 fi
 
+echo "emerge lxde-meta (y/n)"
+echo "purpose: a light weight desktop"
+mx32_prompt "${X_44}"
+if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/libfm gtk" /etc/portage/package.use/lxde-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/libfm gtk"
+		echo 'x11-libs/libfm gtk' >> /etc/portage/package.use/lxde-meta
+	fi
+
+	emerge -v lxde-meta
+fi
+
+echo "emerge gnome-calculator (y/n)"
+echo "purpose: desktop based calculator"
+mx32_prompt "${X_45}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v gnome-calculator
+fi
+
+echo "emerge evince (y/n)"
+echo "purpose: pdf viewer"
+mx32_prompt "${X_46}"
+if [[ "${X}" == "y" ]] ; then
+	grep "app-text/poppler cairo" /etc/portage/package.use/evince > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use app-text/poppler cairo"
+		echo 'app-text/poppler cairo' >> /etc/portage/package.use/evince
+	fi
+	emerge -v evince
+fi
+
+echo "emerge vim (y/n)"
+echo "purpose: command line text editor"
+mx32_prompt "${X_47}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v vim
+fi
+
+echo "emerge emacs (y/n)"
+echo "purpose: command line text editor"
+mx32_prompt "${X_48}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v emacs
+fi
+
+echo "emerge sudo (y/n)"
+echo "purpose: elevating priveleges for short time or temporary for a program"
+mx32_prompt "${X_50}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v sudo
+fi
+
+echo "emerge gentoolkit (y/n)"
+echo "purpose: for finding what the package use flags mean and which package owns the file"
+mx32_prompt "${X_51}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v gentoolkit
+fi
+
+echo "emerge genkernel (y/n)"
+echo "purpose: creating or updating the linux kernel"
+mx32_prompt "${X_52}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v genkernel
+fi
+
+echo "emerge ccache (y/n)"
+echo "purpose: faster compilation recoverly after failed previous attempt"
+mx32_prompt "${X_53}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v ccache
+
+	grep "FEATURES=\"sandbox\"" /etc/portage/make.conf.native
+	if [[ "$?" == "0" ]] ; then
+		echo "adding sandbox to FEATURES in /etc/portage/make.conf.native"
+		sed -i -e 's|FEATURES="sandbox"|FEATURES="sandbox ccache"|g' /etc/portage/make.conf.native
+	else
+		echo "you may need to manually add ccache to FEATURES in your /etc/portage/make.conf.native for portage to use ccache."
+	fi
+fi
+
+echo "emerge gimp (y/n)"
+echo "purpose: photo editing like photoshop"
+mx32_prompt "${X_54}"
+if [[ "${X}" == "y" ]] ; then
+	grep "media-gfx/gimp exif jpeg jpeg2k png tiff pdf mng wmf xpm svg smp" /etc/portage/package.use/gimp > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-gfx/gimp exif jpeg jpeg2k png tiff pdf mng wmf xpm svg smp"
+		echo 'media-gfx/gimp exif jpeg jpeg2k png tiff pdf mng wmf xpm svg smp' >> /etc/portage/package.use/gimp
+	fi
+
+	emerge -v gimp
+fi
+
+echo "emerge audacious (y/n)"
+echo "purpose: audio player like winamp"
+mx32_prompt "${X_55}"
+if [[ "${X}" == "y" ]] ; then
+	grep "media-plugins/audacious-plugins gtk3 aac mp3 scrobbler mms http alsa flac sndfile vorbis" /etc/portage/package.use/audacious > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-plugins/audacious-plugins gtk aac mp3 scrobbler mms http alsa flac sndfile vorbis"
+		echo 'media-plugins/audacious-plugins gtk3 aac mp3 scrobbler mms http alsa flac sndfile vorbis' >> /etc/portage/package.use/audacious
+	fi
+
+	grep "media-sound/audacious gtk3" /etc/portage/package.use/audacious > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-sound/audacious gtk3"
+		echo 'media-sound/audacious gtk3' >> /etc/portage/package.use/audacious
+	fi
+
+	emerge -v audacious
+fi
+
+echo "emerge ncftp (y/n)"
+echo "purpose: ftp client"
+mx32_prompt "${X_56}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v ncftp
+fi
+
+echo "emerge x11vnc (y/n)"
+echo "purpose: provides a vnc server to allow your computer to be accessed using a vnc client such as ipad"
+mx32_prompt "${X_57}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v x11vnc
+fi
+
+echo "emerge hexchat (y/n)"
+echo "purpose: irc chat that can be used for getting linux/gentoo online support through freenode.net"
+mx32_prompt "${X_58}"
+if [[ "${X}" == "y" ]] ; then
+	grep "net-irc/hexchat spell" /etc/portage/package.use/hexchat > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use net-irc/hexchat spell"
+		echo 'net-irc/hexchat spell' >> /etc/portage/package.use/hexchat
+	fi
+
+	emerge -v hexchat
+fi
+
+echo "emerge pidgin (y/n)"
+echo "purpose: instant messenger"
+mx32_prompt "${X_59}"
+if [[ "${X}" == "y" ]] ; then
+	grep "net-im/pidgin spell gnutls" /etc/portage/package.use/pidgin > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use net-im/pidgin spell gnutls"
+		echo 'net-im/pidgin spell gnutls' >> /etc/portage/package.use/pidgin
+	fi
+
+	emerge -v pidgin
+fi
+
+echo "emerge vsftpd (y/n)"
+echo "purpose: an ftp server"
+mx32_prompt "${X_60}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v vsftpd
+fi
+
+echo "emerge apache (y/n)"
+echo "purpose: world wide web html web server"
+mx32_prompt "${X_61}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v apache
+fi
+
+echo "emerge php (y/n)"
+echo "purpose: world wide web server-side programming"
+mx32_prompt "${X_62}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v php
+fi
+
+echo "emerge mariadb (y/n)"
+echo "purpose: sql server"
+mx32_prompt "${X_63}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v mariadb
+fi
+
+echo "emerge phpmyadmin (y/n)"
+echo "purpose: mysql/mariadb database editor"
+mx32_prompt "${X_64}"
+if [[ "${X}" == "y" ]] ; then
+	grep "dev-lang/php mysqli fpm" /etc/portage/package.use/phpmyadmin > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "dev-lang/php mysqli fpm"
+		echo 'dev-lang/php mysqli fpm' >> /etc/portage/package.use/phpmyadmin
+	fi
+
+	grep "app-eselect/eselect-php fpm" /etc/portage/package.use/phpmyadmin > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "app-eselect/eselect-php fpm"
+		echo 'app-eselect/eselect-php fpm' >> /etc/portage/package.use/phpmyadmin
+	fi
+
+	emerge -v phpmyadmin
+fi
+
+echo "emerge nginx (y/n)"
+echo "purpose: www http web server"
+mx32_prompt "${X_65}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v nginx
+fi
+
+echo "emerge app-misc/screen (y/n)"
+echo "purpose: copy paste in terminal"
+mx32_prompt "${X_66}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v app-misc/screen
+fi
+
+echo "emerge vlc (y/n)"
+echo "purpose: a desktop based movie player"
+mx32_prompt "${X_67}"
+if [[ "${X}" == "y" ]] ; then
+	grep "sys-libs/zlib minizip" /etc/portage/package.use/vlc > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use sys-libs/zlib minizip"
+		echo 'sys-libs/zlib minizip' >> /etc/portage/package.use/vlc
+	fi
+
+	emerge -v vlc
+fi
+
+echo "emerge audacity (y/n)"
+echo "purpose: a desktop based wav audio editor"
+mx32_prompt "${X_68}"
+if [[ "${X}" == "y" ]] ; then
+	grep "media-sound/audacity alsa flac id3tag mp3 vorbis twolame midi" /etc/portage/package.use/audacity > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-sound/audacity alsa flac id3tag mp3 vorbis twolame midi"
+		echo 'media-sound/audacity alsa flac id3tag mp3 vorbis twolame midi' >> /etc/portage/package.use/audacity
+	fi
+
+	emerge -v audacity
+fi
+
+echo "emerge inkscape (y/n)"
+echo "purpose: for vector drawing"
+mx32_prompt "${X_69}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v inkscape
+fi
+
+echo "emerge obs-studio (y/n)"
+echo "purpose: for livestreaming on youtube-gaming or twitch"
+mx32_prompt "${X_70}"
+if [[ "${X}" == "y" ]] ; then
+        grep "=media-video/obs-studio-18.0.2 ~amd64" /etc/portage/package.keywords/obs-studio > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keyword =media-video/obs-studio-18.0.2 ~amd64"
+                echo '=media-video/obs-studio-18.0.2 ~amd64' >> /etc/portage/package.keywords/obs-studio
+        fi
+
+        grep "dev-libs/libpcre pcre16" /etc/portage/package.use/obs-studio > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use dev-libs/libpcre pcre16"
+                echo 'dev-libs/libpcre pcre16' >> /etc/portage/package.use/obs-studio
+        fi
+
+        grep "x11-libs/libxcb xkb" /etc/portage/package.use/obs-studio > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/libxcb xkb"
+                echo 'x11-libs/libxcb xkb' >> /etc/portage/package.use/obs-studio
+        fi
+
+        grep "media-video/ffmpeg x264" /etc/portage/package.use/obs-studio > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-video/ffmpeg x264"
+                echo 'media-video/ffmpeg x264' >> /etc/portage/package.use/obs-studio
+        fi
+
+        grep "x11-libs/libxkbcommon X" /etc/portage/package.use/obs-studio > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/libxkbcommon X"
+                echo 'x11-libs/libxkbcommon X' >> /etc/portage/package.use/obs-studio
+        fi
+
+	emerge -v obs-studio
+fi
+
+echo "emerge xscreensaver (y/n)"
+echo "purpose: for screensavers for desktop environment"
+echo "notes: this adds opengl screensavers if already emerged"
+mx32_prompt "${X_71}"
+if [[ "${X}" == "y" ]] ; then
+        grep "x11-misc/xscreensaver jpeg opengl" /etc/portage/package.use/xscreensaver > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-misc/xscreensaver jpeg opengl"
+                echo 'x11-misc/xscreensaver jpeg opengl' >> /etc/portage/package.use/xscreensaver
+        fi
+
+	emerge -v xscreensaver
+fi
+
+echo "emerge blender (y/n)"
+echo "purpose: for 3d modeling for building movie models, video game characters and levels, for designing virtual reality assets."
+mx32_prompt "${X_72}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v blender
+fi
+
+echo "emerge libreoffice (y/n)"
+echo "purpose: for working with office documents (letters, spreadsheets)"
+mx32_prompt "${X_73}"
+if [[ "${X}" == "y" ]] ; then
+        grep "media-libs/harfbuzz icu" /etc/portage/package.use/libreoffice > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/harfbuzz icu"
+                echo 'media-libs/harfbuzz icu' >> /etc/portage/package.use/libreoffice
+        fi
+
+        grep "app-office/libreoffice vlc gstreamer pdfimport" /etc/portage/package.use/libreoffice > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use app-office/libreoffice vlc gstreamer pdfimport"
+                echo 'app-office/libreoffice vlc gstreamer pdfimport' >> /etc/portage/package.use/libreoffice
+        fi
+
+	emerge -v libreoffice
+fi
+
+echo "emerge cryptsetup (y/n)"
+echo "purpose: for cryptsetup full disk encrypted volumes"
+mx32_prompt "${X_74}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v cryptsetup
+fi
+
+echo "emerge tor (y/n)"
+echo "purpose: for anonymous onion router browsing or accessing the dark web or for whistleblowing purposes"
+mx32_prompt "${X_77}"
+if [[ "${X}" == "y" ]] ; then
+        grep "dev-libs/openssl -bindist" /etc/portage/package.use/tor > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding mask dev-libs/openssl -bindist"
+                echo 'dev-libs/openssl -bindist' >> /etc/portage/package.use/tor
+        fi
+
+        grep "net-misc/openssh -bindist" /etc/portage/package.use/tor > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding mask net-misc/openssh -bindist"
+                echo 'net-misc/openssh -bindist' >> /etc/portage/package.use/tor
+        fi
+
+        grep "dev-qt/qtnetwork -bindist" /etc/portage/package.use/tor > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding mask dev-qt/qtnetwork -bindist"
+                echo 'dev-qt/qtnetwork -bindist' >> /etc/portage/package.use/tor
+        fi
+
+	emerge -1O =openssl-${OPENSSL_VERSION}
+	emerge -1O openssh
+	emerge -v tor
+fi
+
+echo "emerge privoxy (y/n)"
+echo "purpose: for caching and speeding up www access through tor"
+mx32_prompt "${X_78}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v privoxy
+fi
+
+echo "emerge dia (y/n)"
+echo "purpose: for creating flowcharts or diagrams for engineering, computer science, electronics, science"
+mx32_prompt "${X_79}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v dia
+fi
+
+echo "emerge p7zip (y/n)"
+echo "purpose: for decompressing 7zip archives"
+mx32_prompt "${X_80}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v p7zip
+fi
+
+echo "emerge actkbd (y/n)"
+echo "purpose: for configuring custom special keys on keyboards"
+mx32_prompt "${X_81}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v actkbd
+fi
+
+echo "emerge physlock (y/n)"
+echo "purpose: for locking the console on idle"
+mx32_prompt "${X_82}"
+if [[ "${X}" == "y" ]] ; then
+        grep "=app-misc/physlock-0.5 ~amd64" /etc/portage/package.keywords/physlock > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keyword =app-misc/physlock-0.5 ~amd64"
+                echo '=app-misc/physlock-0.5 ~amd64' >> /etc/portage/package.keywords/physlock
+        fi
+
+	emerge -v physlock
+fi
+
+echo "emerge feh (y/n)"
+echo "purpose: for adding wallpaper on desktop and image viewer"
+mx32_prompt "${X_83}"
+if [[ "${X}" == "y" ]] ; then
+        grep "media-libs/imlib2 X gif jpeg png tiff" /etc/portage/package.use/feh > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/imlib2 X gif jpeg png tiff"
+                echo 'media-libs/imlib2 X gif jpeg png tiff' >> /etc/portage/package.use/feh
+        fi
+
+	emerge -v feh
+fi
+
+echo "emerge bitlbee (y/n)"
+echo "purpose: to access instant messenger services though irc daemon"
+mx32_prompt "${X_84}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v bitlbee
+fi
+
+echo "emerge bitlbee (y/n)"
+echo "purpose: to access instant messenger services though irc daemon"
+mx32_prompt "${X_84}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v bitlbee
+fi
+
+echo "emerge wireshark (y/n)"
+echo "purpose: for packet sniffing or debugging network connections"
+mx32_prompt "${X_85}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v wireshark
+fi
+
+echo "emerge weechat (y/n)"
+echo "purpose: for accessing irc though a console terminal and to get linux/gentoo tech support through freenode.net"
+mx32_prompt "${X_86}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v weechat
+fi
+
+echo "emerge kexec-tools (y/n)"
+echo "purpose: for rebooting the kernel without a hard reset"
+mx32_prompt "${X_86}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v kexec-tools
+fi
+
+echo "emerge laptop-mode-tools (y/n)"
+echo "purpose: for managing laptop power.  it indirectly pulls the acpid package which can be used to configure hibernating or suspending the laptop based on the lid status."
+mx32_prompt "${X_87}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v laptop-mode-tools
+fi
+
+echo "emerge unrar (y/n)"
+echo "purpose: for uncompressing rar files"
+mx32_prompt "${X_89}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v unrar
+fi
+
+echo "emerge xarchiver (y/n)"
+echo "purpose: for viewing the contents of compressed archives in desktop window environment"
+mx32_prompt "${X_90}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v xarchiver
+fi
+
+echo "emerge rabbitvcs (y/n)"
+echo "purpose: a desktop environment frontend for handing git commits/pulls/clone/push through right click menu when using a file manager.  it is like tortoisegit found on windows."
+echo "note: thunar support is provided by default.  you may need to manually change the use flags to support other file managers."
+mx32_prompt "${X_91}"
+if [[ "${X}" == "y" ]] ; then
+        grep "=dev-vcs/rabbitvcs-0.16-r1 ~amd64" /etc/portage/package.keywords/rabbitvcs > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keyword =dev-vcs/rabbitvcs-0.16-r1 ~amd64"
+                echo '=dev-vcs/rabbitvcs-0.16-r1 ~amd64' >> /etc/portage/package.keywords/rabbitvcs
+        fi
+
+        grep "dev-vcs/rabbitvcs diff git spell thunar" /etc/portage/package.use/rabbitvcs > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use dev-vcs/rabbitvcs diff git spell thunar"
+                echo 'dev-vcs/rabbitvcs diff git spell thunar' >> /etc/portage/package.use/rabbitvcs
+        fi
+
+	emerge -v rabbitvcs
+fi
+
+echo "emerge cheese (y/n)"
+echo "purpose: for taking photo from webcam"
+mx32_prompt "${X_92}"
+if [[ "${X}" == "y" ]] ; then
+        grep "media-libs/gst-plugins-base theora" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/gst-plugins-base theora"
+                echo 'media-libs/gst-plugins-base theora' >> /etc/portage/package.use/cheese
+        fi
+
+        grep "x11-libs/gdk-pixbuf jpeg" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/gdk-pixbuf jpeg"
+                echo 'x11-libs/gdk-pixbuf jpeg' >> /etc/portage/package.use/cheese
+        fi
+
+        grep "media-libs/clutter X" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/clutter X"
+                echo 'media-libs/clutter X' >> /etc/portage/package.use/cheese
+        fi
+
+        grep "media-libs/gst-plugins-base X" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/gst-plugins-base X"
+                echo 'media-libs/gst-plugins-base X' >> /etc/portage/package.use/cheese
+        fi
+
+        grep "media-libs/clutter-gtk X" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/clutter-gtk X"
+                echo 'media-libs/clutter-gtk X' >> /etc/portage/package.use/cheese
+        fi
+
+        grep "media-libs/clutter-gst X" /etc/portage/package.use/cheese > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use media-libs/clutter-gst X"
+                echo 'media-libs/clutter-gst X' >> /etc/portage/package.use/cheese
+        fi
+
+	emerge -v cheese
+fi
+
+echo "emerge elinks (y/n)"
+echo "purpose: for viewing web pages through virtual terminal or console.  it is useful for getting technical support for gentoo.  it features tabbed browsing and color support."
+mx32_prompt "${X_93}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v elinks
+fi
+
+echo "emerge pm-utils (y/n)"
+echo "purpose: convenience programs to suspend and hibernate the computer"
+mx32_prompt "${X_94}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v pm-utils
+fi
+
+echo "emerge wxhexeditor (y/n)"
+echo "purpose: desktop based hex editor"
+mx32_prompt "${X_95}"
+if [[ "${X}" == "y" ]] ; then
+        grep "=app-editors/wxhexeditor-0.23 ~amd64" /etc/portage/package.keywords/wxhexeditor > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keyword =app-editors/wxhexeditor-0.23 ~amd64"
+                echo '=app-editors/wxhexeditor-0.23 ~amd64' >> /etc/portage/package.keywords/wxhexeditor
+        fi
+
+	emerge -v wxhexeditor
+fi
+
+echo "emerge hexedit (y/n)"
+echo "purpose: virtual terminal or console based hex editor"
+mx32_prompt "${X_96}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v hexedit
+fi
+
+echo "emerge gucharmap (y/n)"
+echo "purpose: a desktop based character map to find and copy paste special characters or glyphs"
+mx32_prompt "${X_97}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v gucharmap
+fi
+
+echo "emerge eog (y/n)"
+echo "purpose: an image viewer for the desktop"
+mx32_prompt "${X_98}"
+if [[ "${X}" == "y" ]] ; then
+        grep "x11-libs/gdk-pixbuf jpeg" /etc/portage/package.use/eog > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/gdk-pixbuf jpeg"
+                echo 'x11-libs/gdk-pixbuf jpeg' >> /etc/portage/package.use/eog
+        fi
+
+	emerge -v eog
+fi
+
+echo "emerge mirage (y/n)"
+echo "purpose: a lightweight image viewer for the desktop"
+mx32_prompt "${X_99}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v mirage
+fi
+
+echo "emerge keepass (y/n)"
+echo "purpose: a multiplatform keychain to store and generate random passwords.  this is the mono version."
+echo "note: it doesn't work but left for developers to fix mono."
+mx32_prompt "${X_100}"
+if [[ "${X}" == "y" ]] ; then
+        grep "=sys-libs/musl-fts-1.2.5 ~amd64" /etc/portage/package.keywords/keepass > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keywords =sys-libs/musl-fts-1.2.5 ~amd64"
+                echo '=sys-libs/musl-fts-1.2.5 ~amd64' >> /etc/portage/package.keywords/keepass
+        fi
+
+        grep "=dev-libs/elfutils-0.166" /etc/portage/package.unmask/keepass > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding unmask =dev-libs/elfutils-0.166"
+                echo '=dev-libs/elfutils-0.166' >> /etc/portage/package.unmask/keepass
+        fi
+
+        grep "dev-dotnet/libgdiplus cairo" /etc/portage/package.use/keepass > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use dev-dotnet/libgdiplus cairo"
+                echo 'dev-dotnet/libgdiplus cairo' >> /etc/portage/package.use/keepass
+        fi
+
+	emerge -v keepass
+fi
+
+echo "emerge app-admin/keepassx (y/n)"
+echo "purpose: a multiplatform keychain to store and generate random passwords.  this is the non-mono version."
+mx32_prompt "${X_101}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v app-admin/keepassx
+fi
+
+echo "emerge grub (y/n)"
+echo "purpose: allows toinstalls a boot menu to boot between linux and windows"
+mx32_prompt "${X_102}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v grub
+fi
+
+echo "emerge ntfs3g (y/n)"
+echo "purpose: allows you to access windows partitions and files"
+mx32_prompt "${X_103}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v ntfs3g
+fi
+
+echo "emerge thunar (y/n)"
+echo "purpose: this provides a file manager for desktop window environments"
+mx32_prompt "${X_104}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v thunar
+fi
+
+echo "set root password? (yes/no)"
+mx32_prompt "${X_42}"
+if [[ "${X}" == "y" ]] ; then
+	passwd
+fi
+
+echo "creating root home"
+mkdir -p /root
+echo "setting root permissions 700"
+chmod 700 /root
+
+echo "add user? (y/n)"
+echo "note: it is strongly recommended you add a limited user account"
+mx32_prompt "${X_49}"
+while [[ "${X}" =~ "y" ]]
+do
+	echo "what is the user name?"
+	read UA
+	useradd -m -s /bin/bash ${UA}
+
+	echo "add ${UA} user to the wheel group? (y/n)"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} wheel
+	fi
+
+	echo "add ${UA} to the video group? (y/n)"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} video
+	fi
+
+	echo "add ${UA} user to the audio group? (y/n)"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} audio
+	fi
+
+	echo "add ${UA} user to the usb group? (y/n)"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} usb
+	fi
+
+	echo "add ${UA} user to the cdrom group? (y/n)"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} cdrom
+	fi
+
+	echo "add move users? (y/n)"
+	read X
+done
+
 echo "checklist of things to still do:"
 echo ""
 echo "edit /etc/fstab"
-echo "add users"
+echo "add more users"
+echo "set or change your root password if you are planning to use another login system"
 echo "setup bootloader config"
 echo "install bootloader"
 echo "configure wpa_supplicant or /etc/conf.d/net"

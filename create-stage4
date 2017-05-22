@@ -900,13 +900,6 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v bitlbee
 fi
 
-echo "emerge bitlbee (y/n)"
-echo "purpose: to access instant messenger services though irc daemon"
-mx32_prompt "${X_84}"
-if [[ "${X}" == "y" ]] ; then
-	emerge -v bitlbee
-fi
-
 echo "emerge wireshark (y/n)"
 echo "purpose: for packet sniffing or debugging network connections"
 mx32_prompt "${X_85}"

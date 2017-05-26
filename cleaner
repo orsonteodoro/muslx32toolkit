@@ -18,7 +18,11 @@
 
 #note: this is a convenience script to delete the stage3/stage4 image so you can recreate the stage3/stage4 image again while preserving the muslx32 overlay for development purposes
 
-CROSSDEV_PROFILE="x86_64-pc-linux-muslx32"
+pushd `dirname $0` > /dev/null
+MUSLX32_TOOLKIT_FOLDER=`pwd -P`
+popd > /dev/null
+
+source ${MUSLX32_TOOLKIT_FOLDER}/config
 
 CROSSDEV_ROOT="$1"
 
@@ -54,16 +58,16 @@ unmount_all() {
 	done
 
 	while true ; do
-		echo "umounting usr/${CROSSDEV_PROFILE}/dev"
-		umount usr/${CROSSDEV_PROFILE}/dev
+		echo "umounting usr/${CROSSDEV_TARGET}/dev"
+		umount usr/${CROSSDEV_TARGET}/dev
 		if [[ "$?" == "32" ]]; then
 			break
 		fi
 	done
 
 	while true ; do
-		echo "umounting usr/${CROSSDEV_PROFILE}/proc"
-		umount usr/${CROSSDEV_PROFILE}/proc
+		echo "umounting usr/${CROSSDEV_TARGET}/proc"
+		umount usr/${CROSSDEV_TARGET}/proc
 		if [[ "$?" == "32" ]]; then
 			break
 		fi
@@ -75,7 +79,7 @@ unmount_all
 echo "delete the crossdev profile? (y/n)"
 read X
 if [[ "${X}" == "y" ]] ; then
-	crossdev -C ${CROSSDEV_PROFILE}
+	crossdev -C ${CROSSDEV_TARGET}
 fi
 
 echo "comprehensive wipe? home and root will be wiped in both the crossdev profile and in the crossdev image (y/n)"

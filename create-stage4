@@ -33,6 +33,10 @@ mx32_prompt() {
 	fi
 }
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# stage4 setup
+# packages.{use,keywords,mask,unmask} grouped in stage4 file to prevent accidental removal
+
 echo "this script (create-stage4) should exist in the muslx32toolkit folder of the crossdev-profile root.  if not, chroot into the crossdev profile."
 
 cd "/etc/portage"
@@ -40,74 +44,77 @@ rm make.conf
 echo "switching to native make.conf"
 ln -s make.conf.native make.conf
 
-grep "dev-util/pkgconfig internal-glib" /etc/portage/package.use/pkgconfig > /dev/null
+grep "dev-util/pkgconfig internal-glib" /etc/portage/package.use/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "adding use dev-util/pkgconfig internal-glib to fix circular dependency"
-	touch /etc/portage/package.use/pkgconfig
-	echo 'dev-util/pkgconfig internal-glib' >> /etc/portage/package.use/pkgconfig
+	touch /etc/portage/package.use/stage4
+	echo 'dev-util/pkgconfig internal-glib' >> /etc/portage/package.use/stage4
 fi
 
-grep "sys-apps/help2man -nls" /etc/portage/package.use/help2man > /dev/null
+grep "sys-apps/help2man -nls" /etc/portage/package.use/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "adding use sys-apps/help2man -nls to fix circular dependency"
-	touch /etc/portage/package.use/help2man
-	echo 'sys-apps/help2man -nls' >> /etc/portage/package.use/help2man
+	touch /etc/portage/package.use/stage4
+	echo 'sys-apps/help2man -nls' >> /etc/portage/package.use/stage4
 fi
 
-grep "net-dns/libidn -nls" /etc/portage/package.use/libidn > /dev/null
+grep "net-dns/libidn -nls" /etc/portage/package.use/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "adding use net-dns/libidn -nls to fix circular dependency"
-	touch /etc/portage/package.use/libidn
-	echo 'net-dns/libidn -nls' >> /etc/portage/package.use/libidn
+	touch /etc/portage/package.use/stage4
+	echo 'net-dns/libidn -nls' >> /etc/portage/package.use/stage4
 fi
 
-grep "=sys-libs/musl-${MUSL_VERSION}" /etc/portage/package.keywords/musl > /dev/null
+grep "=sys-libs/musl-${MUSL_VERSION}" /etc/portage/package.keywords/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "keywording =sys-libs/musl-${MUSL_VERSION}"
 	mkdir -p /etc/portage/package.keywords/
-	touch /etc/portage/package.keywords/musl
-	echo "=sys-libs/musl-${MUSL_VERSION} **" >> /etc/portage/package.keywords/musl
+	touch /etc/portage/package.keywords/stage4
+	echo "=sys-libs/musl-${MUSL_VERSION} **" >> /etc/portage/package.keywords/stage4
 fi
 
-grep "=sys-devel/gcc-${GCC_VERSION}" /etc/portage/package.keywords/gcc > /dev/null
+grep "=sys-devel/gcc-${GCC_VERSION}" /etc/portage/package.keywords/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "keywording =sys-devel/gcc-${GCC_VERSION}"
 	mkdir -p /etc/portage/package.keywords/
-	touch /etc/portage/package.keywords/gcc
-	echo "=sys-devel/gcc-${GCC_VERSION} **" >> /etc/portage/package.keywords/gcc
+	touch /etc/portage/package.keywords/stage4
+	echo "=sys-devel/gcc-${GCC_VERSION} **" >> /etc/portage/package.keywords/stage4
 fi
 
-grep "=sys-apps/net-tools-${NET_TOOLS_VERSION}" /etc/portage/package.keywords/net-tools > /dev/null
+grep "=sys-apps/net-tools-${NET_TOOLS_VERSION}" /etc/portage/package.keywords/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "keywording =sys-apps/net-tools-${NET_TOOLS_VERSION}"
 	mkdir -p /etc/portage/package.keywords/
-	touch /etc/portage/package.keywords/net-tools
-	echo "=sys-apps/net-tools-${NET_TOOLS_VERSION}" >> /etc/portage/package.keywords/net-tools
+	touch /etc/portage/package.keywords/stage4
+	echo "=sys-apps/net-tools-${NET_TOOLS_VERSION}" >> /etc/portage/package.keywords/stage4
 fi
 
-grep "=sys-apps/net-tools-${NET_TOOLS_VERSION}" /etc/portage/package.unmask/net-tools > /dev/null
+grep "=sys-apps/net-tools-${NET_TOOLS_VERSION}" /etc/portage/package.unmask/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "unmasking =sys-apps/net-tools-${NET_TOOLS_VERSION}"
 	mkdir -p /etc/portage/package.unmask/
-	touch /etc/portage/package.unmask/net-tools
-	echo "=sys-apps/net-tools-${NET_TOOLS_VERSION}" >> /etc/portage/package.unmask/net-tools
+	touch /etc/portage/package.unmask/stage4
+	echo "=sys-apps/net-tools-${NET_TOOLS_VERSION}" >> /etc/portage/package.unmask/stage4
 fi
 
-grep "sys-apps/net-tools::gentoo" /etc/portage/package.mask/net-tools > /dev/null
+grep "sys-apps/net-tools::gentoo" /etc/portage/package.mask/stage4 > /dev/null
 if [[ "$?" != "0" ]] ; then
 	echo "masking sys-apps/net-tools::gentoo"
 	mkdir -p /etc/portage/package.mask/
-	touch /etc/portage/package.mask/net-tools
-	echo "sys-apps/net-tools::gentoo" >> /etc/portage/package.mask/net-tools
+	touch /etc/portage/package.mask/stage4
+	echo "sys-apps/net-tools::gentoo" >> /etc/portage/package.mask/stage4
 fi
 
-#grep "dev-libs/gnulib" /etc/portage/package.keywords/gnulib > /dev/null
+#grep "dev-libs/gnulib" /etc/portage/package.keywords/stage4 > /dev/null
 #if [[ "$?" != "0" ]] ; then
 #	echo "keywording dev-libs/gnulib **"
 #	mkdir -p /etc/portage/package.keywords/
-#	touch /etc/portage/package.keywords/gnulib
-#	echo "dev-libs/gnulib **" >> /etc/portage/package.keywords/gnulib
+#	touch /etc/portage/package.keywords/stage4
+#	echo "dev-libs/gnulib **" >> /etc/portage/package.keywords/stage4
 #fi
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# stage4 build it
 
 echo "emerge system? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 echo "full does a full emerge of the system"
@@ -134,6 +141,10 @@ elif [[ "${X}" == "resume" ]] ; then
 elif [[ "${X}" == "skipfirstresume" ]] ; then
 	emerge -v --skip-first --resume
 fi
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# stage4 extras
+# package.{use,keywords,mask,unmask} target selected packages
 
 echo "emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
 echo "purpose: for encrypted wifi"
@@ -203,20 +214,28 @@ echo "purpose: a server for windowed environments which all desktop environments
 mx32_prompt "${X_27}"
 if [[ "${X}" == "full" ]] ; then
 	#llvm is required for the xorg-drivers and mesa
-	grep "=sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.keywords/llvm > /dev/null
-	if [[ "$?" != "0" ]] ; then
-		echo "keywording =sys-devel/llvm-${LLVM_VERSION} **"
-		mkdir -p /etc/portage/package.keywords/
-		touch /etc/portage/package.keywords/llvm
-		echo "=sys-devel/llvm-${LLVM_VERSION} **" >> /etc/portage/package.keywords/llvm
-	fi
+	#grep "=sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.keywords/xorg-x11 > /dev/null
+	#if [[ "$?" != "0" ]] ; then
+	#	echo "keywording =sys-devel/llvm-${LLVM_VERSION} **"
+	#	mkdir -p /etc/portage/package.keywords/
+	#	touch /etc/portage/package.keywords/xorg-x11
+	#	echo "=sys-devel/llvm-${LLVM_VERSION} **" >> /etc/portage/package.keywords/xorg-x11
+	#fi
 
-	grep ">sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.mask/llvm > /dev/null
+	#grep ">sys-devel/llvm-${LLVM_VERSION}" /etc/portage/package.mask/xorg-x11 > /dev/null
+	##if [[ "$?" != "0" ]] ; then
+	#	echo "masking >sys-devel/llvm-${LLVM_VERSION}"
+	#	mkdir -p /etc/portage/package.mask/
+	#	touch /etc/portage/package.mask/xorg-x11
+	#	echo ">sys-devel/llvm-${LLVM_VERSION}" >> /etc/portage/package.mask/xorg-x11
+	#fi
+
+	#for radeon video card drivers
+	grep "x11-base/xorg-server glamor" /etc/portage/package.use/xorg-x11 > /dev/null
 	if [[ "$?" != "0" ]] ; then
-		echo "masking >sys-devel/llvm-${LLVM_VERSION}"
-		mkdir -p /etc/portage/package.mask/
-		touch /etc/portage/package.mask/llvm
-		echo ">sys-devel/llvm-${LLVM_VERSION}" >> /etc/portage/package.mask/llvm
+		echo "adding use x11-base/xorg-server glamor"
+		touch /etc/portage/package.use/xorg-x11
+		echo 'x11-base/xorg-server glamor' >> /etc/portage/package.use/xorg-x11
 	fi
 
 	emerge -v xorg-x11
@@ -273,6 +292,14 @@ if [[ "${X}" == "y" ]] ; then
 		mkdir -p /etc/portage/package.keywords/
 		touch /etc/portage/package.keywords/xfce4-meta
 		echo "=dev-scheme/guile-${GUILE_VERSION} **" >> /etc/portage/package.keywords/xfce4-meta
+	fi
+
+	#for radeon video card drivers
+	grep "x11-base/xorg-server glamor" /etc/portage/package.use/xorg-x11 > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-base/xorg-server glamor"
+		touch /etc/portage/package.use/xorg-x11
+		echo 'x11-base/xorg-server glamor' >> /etc/portage/package.use/xorg-x11
 	fi
 
 	emerge -v xfce4-meta
@@ -338,6 +365,13 @@ if [[ "${X}" == "y" ]] ; then
 		echo ">www-client/firefox-${FIREFOX_VERSION}" >> /etc/portage/package.mask/firefox
 	fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/firefox > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/firefox
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/firefox
+	fi
+
 	grep "app-text/hunspell::musl" /etc/portage/package.mask/firefox > /dev/null
 	if [[ "$?" != "0" ]] ; then
 		echo "masking app-text/hunspell::musl"
@@ -358,6 +392,13 @@ echo "emerge leafpad? (y/n)"
 echo "purpose: a desktop based text editor and for note taking"
 mx32_prompt "${X_34}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/leafpad > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/leafpad
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/leafpad
+	fi
+
 	emerge -v leafpad
 fi
 
@@ -365,6 +406,13 @@ echo "emerge geany? (y/n)"
 echo "purpose: a programmer text editor with intellisense and color themes"
 mx32_prompt "${X_35}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/geany > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/geany
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/geany
+	fi
+
 	emerge -v geany
 fi
 
@@ -403,6 +451,13 @@ if [[ "${X}" == "y" ]] ; then
 	if [[ "$?" != "0" ]] ; then
 		echo "adding use x11-libs/pango X"
 		echo 'x11-libs/pango X' >> /etc/portage/package.use/filezilla
+	fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/filezilla > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/filezilla
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/filezilla
 	fi
 
 	emerge -v filezilla
@@ -477,6 +532,19 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/gparted
 	fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/gparted > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/gparted
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/gparted
+	fi
+
+        grep "=sys-libs/musl-obstack-1.0 ~amd64" /etc/portage/package.keywords/gparted > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keywords =sys-libs/musl-obstack-1.0 ~amd64"
+                echo '=sys-libs/musl-obstack-1.0 ~amd64' >> /etc/portage/package.keywords/gparted
+        fi
+
 	emerge -v gparted
 fi
 
@@ -490,6 +558,32 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'x11-libs/libfm gtk' >> /etc/portage/package.use/lxde-meta
 	fi
 
+	grep "sys-auth/consolekit policykit" /etc/portage/package.use/lxde-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use sys-auth/consolekit policykit"
+		echo 'sys-auth/consolekit policykit' >> /etc/portage/package.use/lxdemeta
+	fi
+
+	grep "x11-libs/pango X" /etc/portage/package.use/lxde-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/pango X"
+		echo 'x11-libs/pango X' >> /etc/portage/package.use/lxde-meta
+	fi
+
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/lxde-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/lxde-meta
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/lxde-meta
+	fi
+
+	grep "dev-libs/glib dbus" /etc/portage/package.use/lxde-meta > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/glib dbus"
+		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/lxde-meta
+	fi
+
 	emerge -v lxde-meta
 fi
 
@@ -497,6 +591,19 @@ echo "emerge gnome-calculator (y/n)"
 echo "purpose: desktop based calculator"
 mx32_prompt "${X_45}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/gnome-calculator > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/gnome-calculator
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/gnome-calculator
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/gnome-calculator > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/gnome-calculator
+	fi
+
 	emerge -v gnome-calculator
 fi
 
@@ -504,11 +611,31 @@ echo "emerge evince (y/n)"
 echo "purpose: pdf viewer"
 mx32_prompt "${X_46}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/evince > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/evince
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/evince
+	fi
+
 	grep "app-text/poppler cairo" /etc/portage/package.use/evince > /dev/null
 	if [[ "$?" != "0" ]] ; then
 		echo "adding use app-text/poppler cairo"
 		echo 'app-text/poppler cairo' >> /etc/portage/package.use/evince
 	fi
+
+	grep "dev-libs/glib dbus" /etc/portage/package.use/evince > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/glib dbus"
+		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/evince
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/evince > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/evince
+	fi
+
 	emerge -v evince
 fi
 
@@ -542,8 +669,17 @@ fi
 
 echo "emerge genkernel (y/n)"
 echo "purpose: creating or updating the linux kernel"
+echo "note: this ebuild is from the muslx32 overlay and uses a slightly custom initramfs script."
+echo "note: it mounts folder for muslx32.  subdir_mount use flag avoids any potential error from moving files."
+echo "note: subdir_mount is also used as a kernel parameter pointing to /usr/x86_64-pc-linux-muslx32 while root and real_root point to the partition."
 mx32_prompt "${X_52}"
 if [[ "${X}" == "y" ]] ; then
+	grep "sys-kernel/genkernel subdir_mount" /etc/portage/package.use/genkernel > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use sys-kernel/genkernel subdir_mount"
+		echo 'sys-kernel/genkernel subdir_mount' >> /etc/portage/package.use/genkernel
+	fi
+
 	emerge -v genkernel
 fi
 
@@ -570,6 +706,13 @@ if [[ "${X}" == "y" ]] ; then
 	if [[ "$?" != "0" ]] ; then
 		echo "adding use media-gfx/gimp exif jpeg jpeg2k png tiff pdf mng wmf xpm svg smp"
 		echo 'media-gfx/gimp exif jpeg jpeg2k png tiff pdf mng wmf xpm svg smp' >> /etc/portage/package.use/gimp
+	fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/gimp > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/gimp
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/gimp
 	fi
 
 	emerge -v gimp
@@ -618,6 +761,13 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'net-irc/hexchat spell' >> /etc/portage/package.use/hexchat
 	fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/hexchat > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/hexchat
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/hexchat
+	fi
+
 	emerge -v hexchat
 fi
 
@@ -629,6 +779,13 @@ if [[ "${X}" == "y" ]] ; then
 	if [[ "$?" != "0" ]] ; then
 		echo "adding use net-im/pidgin spell gnutls"
 		echo 'net-im/pidgin spell gnutls' >> /etc/portage/package.use/pidgin
+	fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/pidgin > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/pidgin
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/pidgin
 	fi
 
 	emerge -v pidgin
@@ -705,6 +862,12 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'sys-libs/zlib minizip' >> /etc/portage/package.use/vlc
 	fi
 
+	grep "media-video/ffmpeg cpu_flags_x86_mmxext" /etc/portage/package.use/vlc > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use media-video/ffmpeg cpu_flags_x86_mmxext"
+		echo 'media-video/ffmpeg cpu_flags_x86_mmxext' >> /etc/portage/package.use/vlc
+	fi
+
 	emerge -v vlc
 fi
 
@@ -718,6 +881,19 @@ if [[ "${X}" == "y" ]] ; then
 		echo 'media-sound/audacity alsa flac id3tag mp3 vorbis twolame midi' >> /etc/portage/package.use/audacity
 	fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/audacity > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/audacity
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/audacity
+	fi
+
+	grep "x11-libs/pango X" /etc/portage/package.use/audacity > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/pango X"
+		echo 'x11-libs/pango X' >> /etc/portage/package.use/audacity
+	fi
+
 	emerge -v audacity
 fi
 
@@ -725,6 +901,19 @@ echo "emerge inkscape (y/n)"
 echo "purpose: for vector drawing"
 mx32_prompt "${X_69}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/inkscape > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/inkscape
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/inkscape
+	fi
+
+	grep "app-text/poppler cairo" /etc/portage/package.use/inkscape > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use app-text/poppler cairo"
+		echo 'app-text/poppler cairo' >> /etc/portage/package.use/inkscape
+	fi
+
 	emerge -v inkscape
 fi
 
@@ -776,6 +965,20 @@ if [[ "${X}" == "y" ]] ; then
                 echo 'x11-misc/xscreensaver jpeg opengl' >> /etc/portage/package.use/xscreensaver
         fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/xscreensaver > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/xscreensaver
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/xscreensaver
+	fi
+
+	grep "x11-libs/gdk-pixbuf X" /etc/portage/package.use/xscreensaver > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/gdk-pixbuf X"
+		touch /etc/portage/package.use/xscreensaver
+		echo 'x11-libs/gdk-pixbuf X' >> /etc/portage/package.use/xscreensaver
+	fi
+
 	emerge -v xscreensaver
 fi
 
@@ -801,6 +1004,13 @@ if [[ "${X}" == "y" ]] ; then
                	echo "adding use app-office/libreoffice vlc gstreamer pdfimport"
                 echo 'app-office/libreoffice vlc gstreamer pdfimport' >> /etc/portage/package.use/libreoffice
         fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/libreoffice > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/libreoffice
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/libreoffice
+	fi
 
 	emerge -v libreoffice
 fi
@@ -850,6 +1060,13 @@ echo "emerge dia (y/n)"
 echo "purpose: for creating flowcharts or diagrams for engineering, computer science, electronics, science"
 mx32_prompt "${X_79}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/dia > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/dia
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/dia
+	fi
+
 	emerge -v dia
 fi
 
@@ -904,6 +1121,37 @@ echo "emerge wireshark (y/n)"
 echo "purpose: for packet sniffing or debugging network connections"
 mx32_prompt "${X_85}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/wireshark > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/wireshark
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/wireshark
+	fi
+
+        grep "x11-libs/libxcb xkb" /etc/portage/package.use/wireshark > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/libxcb xkb"
+                echo 'x11-libs/libxcb xkb' >> /etc/portage/package.use/wireshark
+        fi
+
+        grep "x11-libs/libxkbcommon X" /etc/portage/package.use/wireshark > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use x11-libs/libxkbcommon X"
+                echo 'x11-libs/libxkbcommon X' >> /etc/portage/package.use/wireshark
+        fi
+
+	grep "app-text/xmlto text" /etc/portage/package.use/wireshark > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use app-text/xmlto text"
+		echo 'app-text/xmlto text' >> /etc/portage/package.use/wireshark
+	fi
+
+        grep "dev-libs/libpcre pcre16" /etc/portage/package.use/wireshark > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use dev-libs/libpcre pcre16"
+                echo 'dev-libs/libpcre pcre16' >> /etc/portage/package.use/wireshark
+        fi
+
 	emerge -v wireshark
 fi
 
@@ -939,6 +1187,13 @@ echo "emerge xarchiver (y/n)"
 echo "purpose: for viewing the contents of compressed archives in desktop window environment"
 mx32_prompt "${X_90}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/xarchiver > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/xarchiver
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/xarchiver
+	fi
+
 	emerge -v xarchiver
 fi
 
@@ -958,6 +1213,13 @@ if [[ "${X}" == "y" ]] ; then
                	echo "adding use dev-vcs/rabbitvcs diff git spell thunar"
                 echo 'dev-vcs/rabbitvcs diff git spell thunar' >> /etc/portage/package.use/rabbitvcs
         fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/rabbitvcs > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/rabbitvcs
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/rabbitvcs
+	fi
 
 	emerge -v rabbitvcs
 fi
@@ -1029,6 +1291,19 @@ if [[ "${X}" == "y" ]] ; then
                 echo '=app-editors/wxhexeditor-0.23 ~amd64' >> /etc/portage/package.keywords/wxhexeditor
         fi
 
+	grep "x11-libs/cairo X" /etc/portage/package.use/wxhexeditor > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/wxhexeditor
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/wxhexeditor
+	fi
+
+	grep "x11-libs/pango X" /etc/portage/package.use/wxhexeditor > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/pango X"
+		echo 'x11-libs/pango X' >> /etc/portage/package.use/wxhexeditor
+	fi
+
 	emerge -v wxhexeditor
 fi
 
@@ -1043,6 +1318,19 @@ echo "emerge gucharmap (y/n)"
 echo "purpose: a desktop based character map to find and copy paste special characters or glyphs"
 mx32_prompt "${X_97}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/gucharmap > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/gucharmap
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/gucharmap
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/gparted > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/gparted
+	fi
+
 	emerge -v gucharmap
 fi
 
@@ -1050,11 +1338,30 @@ echo "emerge eog (y/n)"
 echo "purpose: an image viewer for the desktop"
 mx32_prompt "${X_98}"
 if [[ "${X}" == "y" ]] ; then
+	grep "dev-libs/glib dbus" /etc/portage/package.use/eog > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/glib dbus"
+		echo 'dev-libs/glib dbus' >> /etc/portage/package.use/eog
+	fi
+
         grep "x11-libs/gdk-pixbuf jpeg" /etc/portage/package.use/eog > /dev/null
         if [[ "$?" != "0" ]] ; then
                	echo "adding use x11-libs/gdk-pixbuf jpeg"
                 echo 'x11-libs/gdk-pixbuf jpeg' >> /etc/portage/package.use/eog
         fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/eog > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/eog
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/eog
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/eog > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/eog
+	fi
 
 	emerge -v eog
 fi
@@ -1063,6 +1370,13 @@ echo "emerge mirage (y/n)"
 echo "purpose: a lightweight image viewer for the desktop"
 mx32_prompt "${X_99}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/mirage > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/mirage
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/mirage
+	fi
+
 	emerge -v mirage
 fi
 
@@ -1075,6 +1389,12 @@ if [[ "${X}" == "y" ]] ; then
         if [[ "$?" != "0" ]] ; then
                	echo "adding keywords =sys-libs/musl-fts-1.2.5 ~amd64"
                 echo '=sys-libs/musl-fts-1.2.5 ~amd64' >> /etc/portage/package.keywords/keepass
+        fi
+
+        grep "=sys-libs/musl-obstack-1.0 ~amd64" /etc/portage/package.keywords/keepass > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding keywords =sys-libs/musl-obstack-1.0 ~amd64"
+                echo '=sys-libs/musl-obstack-1.0 ~amd64' >> /etc/portage/package.keywords/keepass
         fi
 
         grep "=dev-libs/elfutils-0.166" /etc/portage/package.unmask/keepass > /dev/null
@@ -1117,7 +1437,54 @@ echo "emerge thunar (y/n)"
 echo "purpose: this provides a file manager for desktop window environments"
 mx32_prompt "${X_104}"
 if [[ "${X}" == "y" ]] ; then
+	grep "x11-libs/cairo X" /etc/portage/package.use/thunar > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/thunar
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/thunar
+	fi
+
 	emerge -v thunar
+fi
+
+#todo
+echo "emerge xmonad (y/n)"
+echo "purpose: this provides a tiling window manager with fibonacci tilting"
+mx32_prompt "${X_105}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v xmonad
+fi
+
+echo "emerge seahorse (y/n)"
+echo "purpose: this is a program to manage pgp encryption keys"
+mx32_prompt "${X_106}"
+if [[ "${X}" == "y" ]] ; then
+        grep "app-crypt/pinentry gnome-keyring" /etc/portage/package.use/seahorse > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use app-crypt/pinentry gnome-keyring"
+                echo 'app-crypt/pinentry gnome-keyring' >> /etc/portage/package.use/seahorse
+        fi
+
+        grep "app-crypt/gcr gtk" /etc/portage/package.use/seahorse > /dev/null
+        if [[ "$?" != "0" ]] ; then
+               	echo "adding use app-crypt/gcr gtk"
+                echo 'app-crypt/gcr gtk' >> /etc/portage/package.use/seahorse
+        fi
+
+	grep "x11-libs/cairo X" /etc/portage/package.use/seahorse > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use x11-libs/cairo X"
+		touch /etc/portage/package.use/seahorse
+		echo 'x11-libs/cairo X' >> /etc/portage/package.use/seahorse
+	fi
+
+	grep "dev-libs/libxml2 python" /etc/portage/package.use/seahorse > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding use dev-libs/libxml2 python"
+		echo 'dev-libs/libxml2 python' >> /etc/portage/package.use/seahorse
+	fi
+
+	emerge -v seahorse
 fi
 
 echo "set root password? (yes/no)"
@@ -1170,7 +1537,7 @@ do
 		gpasswd -a ${UA} cdrom
 	fi
 
-	echo "add move users? (y/n)"
+	echo "add more users? (y/n)"
 	read X
 done
 

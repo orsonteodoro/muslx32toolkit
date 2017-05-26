@@ -1,0 +1,3 @@
+emerge -pvO wpa_supplicant layman dhcpcd wireless-tools links ntp gentoo-sources xorg-x11 dwm xfce4-meta xfce4-terminal firefox  alsa-utils leafpad geany lilo mplayer filezilla strace gdb networkmanager gparted lxde-meta gnome-calculator evince vim emacs sudo \
+gentoolkit ccache gimp audacious ncftp x11vnc hexchat pidgin vsftpd apache php mariadb phpmyadmin nginx app-misc/screen vlc audacity inkscape obs-studio xscreensaver blender libreoffice cryptsetup tor privoxy dia p7zip actkbd physlock feh bitlbee \
+wireshark weechat kexec-tools laptop-mode-tools unrar xarchiver rabbitvcs cheese elinks pm-utils wxhexeditor hexedit gucharmap eog mirage keepass app-admin/keepassx grub ntfs3g thunar xmonad seahorse

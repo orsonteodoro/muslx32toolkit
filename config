@@ -40,6 +40,18 @@ SPIDERMONKEY_VERSION="1.8.5-r5"
 
 MY_CFLAGS='-O2 -pipe -fomit-frame-pointer'
 
-LLVM_VERSION="3.8.1-r2" #3.9.1 and above is broken
+#LLVM_VERSION="3.8.1-r2" #disabled in create-stage4
 PYTHON_2_VERSION="2.7"
 PYTHON_3_VERSION="3.4"
+
+#VIDEO_CARDS according to mesa:
+# r600 radeon radeonsi (-freedreno) -i915 -i965 -intel -nouveau -r100 -r200 -r300 (-vc4) -vmware
+
+#VIDEO_CARDS according to xorg-drivers:
+# radeon -amdgpu -apm -ark -ast -chips -cirrus -dummy -epson -fbdev (-fglrx) (-freedreno) (-geode) -glint -i128
+# (-i740) -i915 -i965 -intel -mach64 -mga -neomagic (-newport) -nouveau -nv -nvidia (-omap) -qxl -r128 -radeonsi -rendition -s3 -s3virge -savage
+# -siliconmotion -sis -sisusb (-sunbw2) (-suncg14) (-suncg3) (-suncg6) (-sunffb) (-sunleo) (-suntcx) -tdfx (-tegra) -tga -trident -tseng -vesa
+# -via -virtualbox -vmware (-voodoo)
+#example: VIDEO_CARD_TARGETS="r600 radeon"
+#note: remember that binary drivers are not supported because there is no x32 abi offering.  only open source drivers work.
+VIDEO_CARD_TARGETS=""

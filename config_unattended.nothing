@@ -4,8 +4,6 @@ X_mode="unattended" #possiblities: unattended, prompt
 
 #use a text editor to see the create-stage4 file for the purpose description of each checkpoint if you are unfamiliar with these programs
 
-#this config file disables all for testing purposes allowing the developer to check or selectively install packages one by one
-
 #build-crossdev-toolchain settings
 X_0a="n" #"Unpack ${STAGE3_TARBALL} (y/n)"
 X_0b="n" #"Unpack ${PORTAGE_SNAPSHOT_TARBALL} (y/n)"
@@ -111,11 +109,13 @@ X_96="n" #"emerge hexedit (y/n)"
 X_97="n" #"emerge gucharmap (y/n)"
 X_98="n" #"emerge eog (y/n)"
 X_99="n" #"emerge mirage (y/n)"
-X_100="n" #"emerge keepass (y/n)"
+X_100="n" #"emerge keepass (y/n)" #broken because mono is broken
 X_101="n" #"emerge app-admin/keepassx (y/n)"
 X_102="n" #"emerge grub (y/n)" #still needs testing and may not work
 X_103="n" #"emerge ntfs3g (y/n)"
 X_104="n" #"emerge thunar (y/n)"
+X_105="n" #"emerge xmonad (y/n)" #broken because need a x32 abi ghc crosscompiler.  none exist
+X_106="n" #"emerge seahorse (y/n)"
 
 X_42="n" #"set root password? (y/n)"
 X_49="n" #"add user (y/n)" #specifying y will prompt user name and password requested from useradd

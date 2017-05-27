@@ -245,13 +245,13 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 	emerge -v --resume --skip-first
 fi
 
-echo "copy 20-nouveau.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf (y/n)"
+echo "copy 20-video.conf to /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d/20-video.conf (y/n)"
 echo "this is a template.  you still need to make changes to which driver to use and the video resolution and the monitor Hz."
 echo "purpose: fix for musl to load modules"
 mx32_prompt "${X_28}"
 if [[ "${X}" == "y" ]] ; then
 	mkdir -p /usr/${CROSSDEV_TARGET}/etc/X11/xorg.conf.d
-	cp -a ${MUSLX32_TOOLKIT_FOLDER}/configs/20-nouveau.conf /etc/X11/xorg.conf.d/20-video.conf
+	cp -a ${MUSLX32_TOOLKIT_FOLDER}/configs/20-video.conf /etc/X11/xorg.conf.d/20-video.conf
 fi
 
 echo "emerge dwm window manager? (y/n)"
@@ -1487,6 +1487,57 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v seahorse
 fi
 
+echo "emerge linux-firmware (y/n)"
+echo "purpose: this allows you to use your wifi or video card"
+mx32_prompt "${X_107}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v linux-firmware
+fi
+
+echo "add fixalsa init script and add the service? (y/n)"
+echo "purpose: it fixes permissions for alsa"
+mx32_prompt "${X_108}"
+if [[ "${X}" == "y" ]] ; then
+	cp ${MUSLX32_TOOLKIT_FOLDER}/configs/fixalsa /etc/init.d
+	pushd /etc/init.d
+	rc-update add fixalsa default
+	popd
+fi
+
+echo "add fixtty init script and add the service? (y/n)"
+echo "purpose: it fixes permissions for tty so that xterm and other terminal programs can be used properly"
+mx32_prompt "${X_109}"
+if [[ "${X}" == "y" ]] ; then
+	cp ${MUSLX32_TOOLKIT_FOLDER}/configs/fixtty /etc/init.d
+	pushd /etc/init.d
+	rc-update add fixtty default
+	popd
+fi
+
+echo "add fixvideo init script and add the service? (y/n)"
+echo "purpose: it fixes permissions for video so hardware acceleration could work properly"
+mx32_prompt "${X_110}"
+if [[ "${X}" == "y" ]] ; then
+	cp ${MUSLX32_TOOLKIT_FOLDER}/configs/fixvideo /etc/init.d
+	pushd /etc/init.d
+	rc-update add fixvideo default
+	popd
+fi
+
+echo "emerge dmenu (y/n)"
+echo "purpose: this provides a menu for dwm window manager"
+mx32_prompt "${X_107}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v dmenu
+fi
+
+echo "emerge mesa-progs (y/n)"
+echo "purpose: this provides glxgears to check if opengl is working properly"
+mx32_prompt "${X_108}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v mesa-progs
+fi
+
 echo "set root password? (yes/no)"
 mx32_prompt "${X_42}"
 if [[ "${X}" == "y" ]] ; then
@@ -1536,6 +1587,8 @@ do
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} cdrom
 	fi
+
+	echo "remember to use passwd to allow user to enter password"
 
 	echo "add more users? (y/n)"
 	read X

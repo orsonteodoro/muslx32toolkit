@@ -16,6 +16,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#note: this script is being deprecated and eventually be deleted
+#note: this script is simplifies compiling kernel.  see gkern-config to set it up before using it.
 
-exec make ARCH="x86_64" CROSS_COMPILE="x86_64-pc-linux-muslx32-" INSTALL_MOD_PATH="${SYSROOT}" "$@"
+source /etc/portage/make.conf
+source /usr/src/gkern-config
+
+mount /dev/${BOOT_PARTITION} /boot
+cd /boot
+
+genkernel --kernel-cc=${CHOST}-gcc --utils-cc=${CHOST}-gcc --kernel-config=/etc/kernels/kernel-config-x86_64-$VER-gentoo$REV --kernel-ld=/usr/${CHOST}/binutils-bin/$(ld -v | cut -d' ' -f 4)/ld.bfd --menuconfig all
+#mount windows partition first so grub can detect it
+if [ -e /usr/bin/ntfs-3g ] ; then
+	mkdir -p /mnt/windows
+	ntfs-3g /dev/${WINDOWS_PARTITION} /mnt/windows
+fi
+#grub-mkconfig -o /boot/grub/grub.cfg #uncomment to generate a grub.cfg automatically
+grub-install /dev/${BOOT_DRIVE}
+
+#emerge additional modules below
+#emerge -1 <yourmodulehere>

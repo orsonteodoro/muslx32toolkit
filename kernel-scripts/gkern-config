@@ -16,6 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#note: this script is being deprecated and eventually be deleted
+#note: this contains the common configuration common to fixboot, gkern-gentoo, fixmodules.  it must be set up with the proper versions and devices before calling gkern-gentoo.
 
-exec make ARCH="x86_64" CROSS_COMPILE="x86_64-pc-linux-muslx32-" INSTALL_MOD_PATH="${SYSROOT}" "$@"
+VER="4.9.16" #kernel version
+REV="" #REV can be -r1
+BOOT_DRIVE="sdc"
+BOOT_PARTITION="sdc7"
+WINDOWS_PARTITION="sda2"

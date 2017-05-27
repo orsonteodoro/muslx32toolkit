@@ -306,6 +306,15 @@ if [[ "$X" == "y" ]] ; then
 	mkdir -p /usr/${CROSSDEV_TARGET}/usr/src
 	cp ${MUSLX32_TOOLKIT_FOLDER}/xkmake /usr/${CROSSDEV_TARGET}/usr/src
 	chmod +x /usr/${CROSSDEV_TARGET}/usr/src/xkmake
+	echo "remember to copy xkmake into your root of your kernel sources"
+	echo "invoke it natively by using ./xkmake bzImage; ./xkmake modules; ./xkmake modules-install"
+fi
+
+echo "add genkernel scripts (fixboot,fixmodules,gkern-gentoo) (y/n)"
+mx32_prompt "${X_13a}"
+if [[ "$X" == "y" ]] ; then
+	cp ${MUSLX32_TOOLKIT_FOLDER}/kernel-scripts/{fixboot,fixmodules,gkern-gentoo,gkern-config} /usr/${CROSSDEV_TARGET}/usr/src
+	chmod +x /usr/${CROSSDEV_TARGET}/usr/src/{fixboot,fixmodules,gkern-gentoo}
 fi
 
 echo "adding overlays to crossdev profile"
@@ -498,6 +507,15 @@ if [ ! -d "/usr/${CROSSDEV_TARGET}/usr/portage" ] ; then
 	cp -a /usr/portage /usr/${CROSSDEV_TARGET}/usr/
 fi
 
+#todo
+#it doesn't work because ghc package is currently broken
+#echo "crossbuild ghc for xmonad and for dependencies of ghc?"
+#if [[ "${X}" == "y" ]] ; then
+#	${CROSSDEV_TARGET}-emerge -1 libffi ncurses gmp
+#	${CROSSDEV_TARGET}-emerge --buildpkg -1 dev-lang/ghc
+#	echo "you still need to emerge --usepkg -1 dev-lang/ghc natively"
+#fi
+
 echo "copy/override /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.native; and also move make.conf to make.conf.cross; and also symlink make.conf.native to make.conf? (y/n)"
 mx32_prompt "${X_15}"
 if [[ "${X}" == "y" ]] ; then
@@ -541,6 +559,10 @@ fi
 
 echo "copying muslx32toolkit folder into /usr/${CROSSDEV_TARGET}"
 cp -a ${MUSLX32_TOOLKIT_FOLDER} /usr/${CROSSDEV_TARGET}
+
+#other final fixes
+mkdir -p /usr/${CROSSDEV_TARGET}/mnt
+mkdir -p /usr/${CROSSDEV_TARGET}/sys #required to run xorg-server
 
 echo "chroot into crossdev profile? (y/n/chroot-and-autorun-next-script)"
 echo "you should run create-stage4 after chrooting to fix any problems"

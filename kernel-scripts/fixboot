@@ -16,6 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#note: this script is being deprecated and eventually be deleted
+#note: this script is a convenience script to install the bootloader
 
-exec make ARCH="x86_64" CROSS_COMPILE="x86_64-pc-linux-muslx32-" INSTALL_MOD_PATH="${SYSROOT}" "$@"
+source /etc/portage/make.conf
+source /usr/src/gkern-config
+
+if [ -e /usr/bin/ntfs-3g ] ; then
+	mount /dev/${BOOT_PARTITION} /boot
+	ntfs-3g /dev/${WINDOWS_PARTITION} /mnt/windows
+fi
+#grub-mkconfig -o /boot/grub/grub.cfg #uncomment to generate a grub.cfg automatically
+grub-install /dev/${BOOT_DRIVE}

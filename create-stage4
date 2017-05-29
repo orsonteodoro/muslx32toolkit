@@ -1558,37 +1558,66 @@ do
 	read UA
 	useradd -m -s /bin/bash ${UA}
 
+	echo "adding ${UA} to the users group"
+	gpasswd -a ${UA} users
+
 	echo "add ${UA} user to the wheel group? (y/n)"
+	echo "this is to allow you to use sudo and to run programs with elevated privileges."
 	read X
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} wheel
 	fi
 
 	echo "add ${UA} to the video group? (y/n)"
+	echo "this is to use hardware acceleration"
 	read X
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} video
 	fi
 
 	echo "add ${UA} user to the audio group? (y/n)"
+	echo "this is for hearing audio"
 	read X
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} audio
 	fi
 
 	echo "add ${UA} user to the usb group? (y/n)"
+	echo "this is for accessing usb thumb drives"
 	read X
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} usb
 	fi
 
 	echo "add ${UA} user to the cdrom group? (y/n)"
+	echo "this is for accessing cdrom"
 	read X
 	if [[ "${X}" =~ "y" ]] ; then
 		gpasswd -a ${UA} cdrom
 	fi
 
-	echo "remember to use passwd to allow user to enter password"
+	echo "add ${UA} user to the lp group? (y/n)"
+	echo "note this is to use the printer"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} lp
+	fi
+
+	echo "add ${UA} user to the lpadmin group? (y/n)"
+	echo "note this is to setup the printer"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} lpadmin
+	fi
+
+	echo "add ${UA} user to the games group? (y/n)"
+	echo "note this is to play games"
+	read X
+	if [[ "${X}" =~ "y" ]] ; then
+		gpasswd -a ${UA} games
+	fi
+
+	echo "remember to use passwd to allow user to enter password or to provide a user a temporary password"
 
 	echo "add more users? (y/n)"
 	read X

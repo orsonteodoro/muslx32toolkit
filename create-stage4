@@ -1659,7 +1659,7 @@ do
 	if [[ "${X}" =~ "prompt" ]] ; then
 		echo "enter password:"
 		passwd ${UA}
-	elif [[ "${X}" =~ "prompt" ]] ; then
+	elif [[ "${X}" =~ "passwordless" ]] ; then
 		echo "user can now login without password"
 		passwd -d ${UA}
 	fi

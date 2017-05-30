@@ -563,6 +563,7 @@ cp -a ${MUSLX32_TOOLKIT_FOLDER} /usr/${CROSSDEV_TARGET}
 #other final fixes
 mkdir -p /usr/${CROSSDEV_TARGET}/mnt
 mkdir -p /usr/${CROSSDEV_TARGET}/sys #required to run xorg-server
+mkdir -p /usr/${CROSSDEV_TARGET}/boot #for grub
 
 echo "chroot into crossdev profile? (y/n/chroot-and-autorun-next-script)"
 echo "you should run create-stage4 after chrooting to fix any problems"

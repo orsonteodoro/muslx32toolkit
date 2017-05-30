@@ -1652,7 +1652,17 @@ do
 		gpasswd -a ${UA} games
 	fi
 
-	echo "remember to use passwd to allow user to enter password or to provide a user a temporary password"
+	echo "type of password? (prompt, passwordless, skip)"
+	echo "prompt is a temporary password assigned that you will enter now.  the user may change their password with passwd."
+	echo "passwordless logs in to the immediately without prompting later on"
+	read X
+	if [[ "${X}" =~ "prompt" ]] ; then
+		echo "enter password:"
+		passwd ${UA}
+	elif [[ "${X}" =~ "prompt" ]] ; then
+		echo "user can now login without password"
+		passwd -d ${UA}
+	fi
 
 	echo "add more users? (y/n)"
 	read X

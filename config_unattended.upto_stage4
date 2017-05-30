@@ -121,6 +121,9 @@ X_107="n" #"emerge linux-firmware (y/n)"
 X_108="n" #"add fixalsa init script and add the service? (y/n)"
 X_109="n" #"add fixtty init script and add the service? (y/n)"
 X_110="n" #"add fixvideo init script and add the service? (y/n)"
+X_111="y" #"emerge dmenu (y/n)"
+X_112="y" #"emerge mesa-progs (y/n)"
+X_113="y" #"emerge timezone-data (y/n)"
 
 X_42="y" #"set root password? (y/n)"
 X_49="n" #"add user (y/n)" #specifying y will prompt user name and password requested from useradd

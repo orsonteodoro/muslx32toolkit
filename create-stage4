@@ -200,6 +200,10 @@ echo "purpose: atomic clock time syncronization"
 mx32_prompt "${X_25}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v ntp
+	echo "running: rc-update add ntpd default"
+	rc-update add ntpd default
+	echo "running: rc-update add ntp-client default"
+	rc-update add ntp-client default
 fi
 
 echo "emerge gentoo-sources? (y/n)"
@@ -386,6 +390,8 @@ echo "purpose: access software audio mixer controls through the console"
 mx32_prompt "${X_33}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v alsa-utils
+	echo "running: rc-update add alsasound default"
+	rc-update add alsasound default
 fi
 
 echo "emerge leafpad? (y/n)"
@@ -810,6 +816,8 @@ echo "purpose: world wide web html web server"
 mx32_prompt "${X_61}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v apache
+	echo "running: rc-update add apache2 default"
+	rc-update add apache2 default
 fi
 
 echo "emerge php (y/n)"
@@ -824,6 +832,8 @@ echo "purpose: sql server"
 mx32_prompt "${X_63}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v mariadb
+	echo "running: rc-update add mysql default"
+	rc-update add mysql default
 fi
 
 echo "emerge phpmyadmin (y/n)"
@@ -1054,6 +1064,8 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -1O =openssl-${OPENSSL_VERSION}
 	emerge -1O openssh
 	emerge -v tor
+	echo "running: rc-update add tor default"
+	rc-update add tor default
 fi
 
 echo "emerge privoxy (y/n)"
@@ -1061,6 +1073,8 @@ echo "purpose: for caching and speeding up www access through tor"
 mx32_prompt "${X_78}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v privoxy
+	echo "running: rc-update add privoxy default"
+	rc-update add privoxy default
 fi
 
 echo "emerge dia (y/n)"
@@ -1089,6 +1103,8 @@ echo "purpose: for configuring custom special keys on keyboards"
 mx32_prompt "${X_81}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v actkbd
+	echo "running: rc-update add actkbd default"
+	rc-update add actkbd default
 fi
 
 echo "emerge physlock (y/n)"
@@ -1122,6 +1138,8 @@ echo "purpose: to access instant messenger services though irc daemon"
 mx32_prompt "${X_84}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v bitlbee
+	echo "running: rc-update add bitlbee default"
+	rc-update add bitlbee default
 fi
 
 echo "emerge wireshark (y/n)"
@@ -1533,16 +1551,26 @@ fi
 
 echo "emerge dmenu (y/n)"
 echo "purpose: this provides a menu for dwm window manager"
-mx32_prompt "${X_107}"
+mx32_prompt "${X_111}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v dmenu
 fi
 
 echo "emerge mesa-progs (y/n)"
 echo "purpose: this provides glxgears to check if opengl is working properly"
-mx32_prompt "${X_108}"
+mx32_prompt "${X_112}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v mesa-progs
+fi
+
+echo "emerge timezone-data (y/n)"
+echo "purpose: this is for getting the time right for ntpd"
+mx32_prompt "${X_113}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -v timezone-data
+	echo "dont forget to put your timezone in /etc/timezone"
+	echo "then run emerge --config sys-libs/timezone-data"
+	echo "then run /etc/init.d/ntp-client restart"
 fi
 
 echo "set root password? (yes/no)"
@@ -1632,13 +1660,38 @@ done
 
 echo "checklist of things to still do:"
 echo ""
-echo "edit /etc/fstab"
-echo "add more users"
-echo "set or change your root password if you are planning to use another login system"
+echo "init needs to mount partitions propertly:"
+echo "nano /etc/fstab #add swap and other partitions entries per row"
+echo ""
+echo "protect your system with limited users:"
+echo "useradd -m <username> #add user"
+echo "passwd <username> #change user password"
+echo "gpasswd -a <username> <groupname> #add user to group"
+echo ""
+echo "root password (IMPORTANT):"
+echo "passwd root #set or change your root password if you are planning to use another login system"
+echo ""
+echo "bootloader:"
 echo "setup bootloader config"
-echo "install bootloader"
-echo "configure wpa_supplicant or /etc/conf.d/net"
-echo "add network devices for /etc/init.d/net.*"
+echo "install bootloader.  grub users need to make an entry for muslx32 and use grub-install through amd64 or x86 profile insteal of muslx32.  only lilo is supported natively in muslx32."
+echo "gentoolkit users add subdir_mount=/usr/x86_64-pc-linux-muslx32 kernel parameter to mount the muslx32 partition while keeping the cross toolchain in place.  you may also just copy the crossdev profile instead but this is not recommended."
+echo ""
+echo "networking:"
+echo "ls /sys/class/net #to list network devices"
+echo "ln -s /etc/init.d/net.lo /etc/init.d/net.<my_device_named_in_/sys/class/net/>"
+echo "nano /etc/conf.d/net #see gentoo wiki for wifi: https://wiki.gentoo.org/wiki/Wpa_supplicant and for ethernet: https://wiki.gentoo.org/wiki/Handbook:X86/Full/Networking"
+echo "nano /etc/wpa_supplicant/wpa_supplicant.conf #see gentoo wiki https://wiki.gentoo.org/wiki/Wpa_supplicant"
+echo ""
+echo "sound problems?"
 echo "copy and modify muslx32toolkit/configs/_.asound.rc to user home directory as .asound.rc"
+echo ""
+echo "add your timezone to fix the clock:"
+echo "echo \"America/Los_Angeles\" >> /etc/timezone #see /usr/share/zoneinfo for list of timezones"
+echo "emerge --config sys-libs/timezone-data"
+echo "/etc/ntp-client restart"
+echo ""
 echo "edit kernel settings"
 echo "generate kernel if needed"
+echo "use xkmake or gkern-gentoo to generate the kernel.  genkernel currently doesn't work natively on muslx32.  use genkernel to create kernel modules on muslx32.  use amd64 or x86 profile to create the kernel and initramfs."
+echo ""
+echo "done"

@@ -474,6 +474,13 @@ echo "emerge gdb (y/n)"
 echo "purpose: for debugging c, c++, assembly programs line by line"
 mx32_prompt "${X_40}"
 if [[ "${X}" == "y" ]] ; then
+	grep "=sys-devel/gdb-7.11.1" /etc/portage/package.keywords/gdb > /dev/null
+	if [[ "$?" != "0" ]] ; then
+		echo "adding keyword =sys-devel/gdb-7.11.1"
+		touch /etc/portage/package.keywords/gdb
+		echo '=sys-devel/gdb-7.11.1' >> /etc/portage/package.keywords/gdb
+	fi
+
 	emerge -v gdb
 fi
 

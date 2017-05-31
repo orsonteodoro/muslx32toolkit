@@ -834,6 +834,10 @@ if [[ "${X}" == "y" ]] ; then
 	emerge -v mariadb
 	echo "running: rc-update add mysql default"
 	rc-update add mysql default
+	echo "before configuring mariadb, you need to change your hostname"
+	echo "edit /etc/conf.d/hostname"
+	echo "/etc/init.d/hostname restart"
+	echo "you must emerge --config mariadb to set up the password"
 fi
 
 echo "emerge phpmyadmin (y/n)"
@@ -1703,5 +1707,10 @@ echo ""
 echo "edit kernel settings"
 echo "generate kernel if needed"
 echo "use xkmake or gkern-gentoo to generate the kernel.  genkernel currently doesn't work natively on muslx32.  use genkernel to create kernel modules on muslx32.  use amd64 or x86 profile to create the kernel and initramfs."
+echo ""
+echo "changing hostname:"
+echo "some apps need a hostname other than localhost like mariadb.  to change your hostname do:"
+echo "nano /etc/conf.d/hostname #set name"
+echo "/etc/init.d/hostname restart #update hostname"
 echo ""
 echo "done"

@@ -1,4 +1,7 @@
 # muslx32toolkit
+
+WARNING: Using the cleaner script can cause data loss of you do not unmount your partitions especially on /mnt.  An update to fix this will be coming.
+
 BASH Scripts for Gentoo Linux to build stage3 and stage4 images using crossdev for the muslx32 platform
 
 note: This is currently being actively developed as of 20170507 from the written instructions to automated scripts to avoid human error.

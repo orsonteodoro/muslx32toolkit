@@ -113,6 +113,43 @@ fi
 #	echo "dev-libs/gnulib **" >> /etc/portage/package.keywords/stage4
 #fi
 
+# retpoline fixes
+echo "apply retpoline fixes? (y/n)"
+mx32_prompt "${X_114}"
+if [[ "${X}" == "y" ]] ; then
+	if [ ! -f /etc/portage/env/binutils-enable-gold.conf ] ; then
+		mkdir -p /etc/portage/env
+		echo 'EXTRA_ECONF="--enable-gold=default"' > /etc/portage/env/binutils-enable-gold.conf
+	fi
+
+	if [ -f /etc/portage/make.conf.native ] ; then
+		grep "mindirect-branch=thunk" /etc/portage/make.conf.native
+		if [[ "$?" != "0" ]] ; then
+			echo 'CFLAGS="${CFLAGS} -fno-plt -mindirect-branch=thunk -mindirect-branch-register"' >> /etc/portage/make.conf.native
+			echo 'CXXFLAGS="${CFLAGS}"' >> /etc/portage/make.conf.native
+		fi
+	fi
+
+	echo "copying gold plt retpoline patch"
+	mkdir -p /etc/portage/patches/sys-devel/binutils
+	cp -a "${MUSLX32_TOOLKIT_FOLDER}"/gold-plt-retpoline.patch /etc/portage/patches/sys-devel/binutils
+
+	set -e
+	echo "emerging binutils, binutils-config"
+	# it will break on bison so skip it
+	emerge -1v --keep-going sys-apps/texinfo
+
+	emerge -1v binutils
+	emerge -1v binutils-config
+	binutils-config --linker ld.gold
+	set +e
+fi
+
+echo "making symlinks for multilib gcc"
+ln -s /usr/bin /usr/${CROSSDEV_TARGET}/usr/bin
+ln -s /usr/include /usr/${CROSSDEV_TARGET}/usr/include
+ln -s /usr/lib /usr/${CROSSDEV_TARGET}/usr/lib
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------
 # stage4 build it
 
@@ -157,12 +194,20 @@ elif [[ "${X}" == "skipfirstresume" ]] ; then
 	emerge -v --resume --skip-first
 fi
 
+echo "emerge openssh and openssl? (y/n)"
+mx32_prompt "${X_19a}"
+if [[ "${X}" == "y" ]] ; then
+	emerge -1 openssh openssl
+fi
+
 echo "emerge layman (required to update musl repository)? (y/n)"
 echo "purpose: adds additional 3rd party gentoo community overlays"
 mx32_prompt "${X_20}"
 if [[ "${X}" == "y" ]] ; then
 	emerge -v layman
 fi
+
+
 
 
 echo "sync and update musl overlay? (y/n)"

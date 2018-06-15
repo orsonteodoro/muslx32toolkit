@@ -9,11 +9,17 @@ X_mode="unattended" #possiblities: unattended, prompt
 X_0a="y" #"Unpack ${STAGE3_TARBALL} (y/n)"
 X_0b="y" #"Unpack ${PORTAGE_SNAPSHOT_TARBALL} (y/n)"
 X_0c="chroot-and-autorun-next-script" #"chroot into crossdev toolchain root? (y/n/chroot-and-autorun-next-script)"
+X_0d="y" #"Fix amd64 hardened profile (y/n)"
 
 #stage3 settings
 X_1="y" #"portage sync on crossdev-root? (y/n)"
 X_2="y" #"emerge portage on crosdev-root? (y/n)"
-X_3="y" #"apply package.mask for layman to emerge properly? (y/n)"
+X_3="n" #"apply package.mask for layman to emerge properly? (y/n)"
+X_3a="y" #"apply package.use for openssl/openssh to emerge properly? (y/n)"
+X_3b="y" #"apply package.use for openssl/openssh to emerge properly? (y/n)"
+X_3c="y" #"emerge openssh/openssl (y/n)"
+X_3d="y" #"apply package.use for git to emerge properly? (y/n)"
+X_3e="y" #"apply package.use for cross-x86_64-pc-linux-muslx32/gcc -openmp to emerge properly? (y/n)"
 X_4="y" #"emerge layman on crossdev-root? (y/n)"
 X_5="y" #"emerge crossdev on crossdev-root? (y/n)"
 X_6="clone" #"what to do with the musl overlay on crossdev-root? (clone/update/skip)"
@@ -32,9 +38,11 @@ X_15a="y" #"change cflags for /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.nati
 X_16="chroot-and-autorun-next-script" #"chroot into crossdev profile? (y/n/chroot-and-autorun-next-script)"
 
 #stage4 settings
+X_114="y" #"apply retpoline fixes? (y/n)"
 X_17="full" #"emerge system? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 X_18="skipall" #"emerge world? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 X_19="full" #"emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
+X_19a="y" #"emerge openssh and openssl? (y/n)"
 X_20="y" #"emerge layman (required to update musl repository)? (y/n)"
 X_21="y" #"sync and update musl overlay? (y/n)"
 X_22="y" #"emerge dhcpcd? (y/n)"

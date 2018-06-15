@@ -1,0 +1,18 @@
+--- a/eclass/flag-o-matic.eclass.orig	2017-12-15 22:17:03.000000000 +0000
++++ b/eclass/flag-o-matic.eclass	2018-03-31 03:32:42.431930116 +0000
+@@ -31,6 +31,7 @@ setup-allowed-flags() {
+ 		-fno-ident -fpermissive -frecord-gcc-switches
+ 		'-fdiagnostics*' '-fplugin*'
+ 		'-W*' -w
++		-fno-plt
+ 
+ 		# CPPFLAGS and LDFLAGS
+ 		'-[DUILR]*' '-Wl,*'
+@@ -54,6 +55,7 @@ setup-allowed-flags() {
+ 		-mlittle-endian -mbig-endian -EL -EB -fPIC -mlive-g0 -mcmodel
+ 		-mstack-bias -mno-stack-bias -msecure-plt '-m*-toc' -mfloat-abi
+ 		-mfix-r10000 -mno-fix-r10000 -mthumb -marm
++		'-mindirect-branch*'
+ 
+ 		# gcc 4.5
+ 		-mno-fma4 -mno-movbe -mno-xop -mno-lwp

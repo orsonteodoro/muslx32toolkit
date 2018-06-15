@@ -1,0 +1,10 @@
+--- a/arch/x86/entry/vdso/Makefile.orig	2018-03-19 18:33:33.667472960 -0700
++++ b/arch/x86/entry/vdso/Makefile	2018-03-20 20:04:15.635870561 -0700
+@@ -98,6 +98,7 @@ CFLAGS_REMOVE_vvar.o = -pg
+ 
+ CPPFLAGS_vdsox32.lds = $(CPPFLAGS_vdso.lds)
+ VDSO_LDFLAGS_vdsox32.lds = -Wl,-m,elf32_x86_64 \
++			   -fuse-ld=bfd \
+ 			   -Wl,-soname=linux-vdso.so.1 \
+ 			   -Wl,-z,max-page-size=4096 \
+ 			   -Wl,-z,common-page-size=4096

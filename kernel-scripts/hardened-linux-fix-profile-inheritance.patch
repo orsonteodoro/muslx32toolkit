@@ -1,0 +1,6 @@
+--- a/profiles/hardened/linux/musl/amd64/x32/parent.orig	2017-12-13 03:39:12.000000000 +0000
++++ b/profiles/hardened/linux/musl/amd64/x32/parent	2018-03-29 00:44:43.717766039 +0000
+@@ -1,2 +1,2 @@
+-../../../../../default/linux/musl/amd64/x32
+ ..
++../../../../../default/linux/musl/amd64/x32

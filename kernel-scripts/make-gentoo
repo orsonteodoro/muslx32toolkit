@@ -1,0 +1,43 @@
+#!/bin/bash
+ver="4.9.76"
+verconfig="${ver}"
+flavor="gentoo"
+rev="-r1"
+revconfig="${rev}"
+
+source /etc/portage/make.conf
+
+export CFLAGS="-fomit-frame-pointer -fno-asynchronous-unwind-tables -frename-registers -pipe"
+export CXXFLAGS="${CFLAGS}"
+export CHOST="x86_64-pc-linux-muslx32"
+
+configname="kernel-config-x86_64-${verconfig}-${flavor}${revconfig}"
+if [ ! -f /etc/kernels/${configname} ] ; then
+	echo "you need to create a /etc/kernels/${configname}"
+	exit 1
+fi
+
+rm linux
+ln -s linux-${ver}-${flavor}${rev} linux
+
+grep -r -e "-fuse-ld=bfd" linux/arch/x86/entry/vdso/Makefile
+if [[ "$?" != "0" ]] ; then
+	pushd linux
+	patch -p1 -i ../force-bfd-linker-for-x32-abi.patch
+	popd
+fi
+
+grep -r -e "-m elf32_x86_64" linux/tools/build/Makefile.build
+if [[ "$?" != "0" ]] ; then
+	pushd linux
+	patch -p1 -i ../tools-elfx32.patch
+	popd
+fi
+
+genkernel --kernel-config=/etc/kernels/${configname} --save-config \
+	--kernel-cc="${CHOST}-gcc" --utils-cc="${CHOST}-gcc" \
+	--kernel-ld="/usr/${CHOST}/binutils-bin/$(ld -v | cut -d' ' -f 4)/ld.bfd" \
+	--utils-ld="/usr/${CHOST}/binutils-bin/$(ld -v | cut -d' ' -f 4)/ld.bfd" \
+	--no-zfs \
+	--no-btrfs \
+	all

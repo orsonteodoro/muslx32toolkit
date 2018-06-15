@@ -72,10 +72,20 @@ if [[ "$X" == "y" ]] ; then
 	tar -xvf ${CROSSDEV_ROOT}/${PORTAGE_SNAPSHOT_TARBALL}
 fi
 
+echo "Fix amd64 hardened profile (y/n)"
+mx32_prompt "${X_0d}"
+if [[ "$X" == "y" ]] ; then
+	pushd portage
+	patch -p1 -i "${MUSLX32_TOOLKIT_FOLDER}"/hardened-linux-fix-profile-inheritance.patch
+	popd
+fi
+
 mv portage usr
 
-echo "Mounting dev"
+echo "Mounting dev, sys, run"
 mount --bind /dev dev
+mount --bind /sys sys
+mount --bind /run run
 echo "Mounting proc"
 mount -t proc proc proc
 echo "Copying resolv.conf to etc"

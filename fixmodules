@@ -16,6 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#note: this script is being deprecated and eventually be deleted
+#note: this script is a placeholder to conveniently install modules
 
-exec make ARCH="x86_64" CROSS_COMPILE="x86_64-pc-linux-muslx32-" INSTALL_MOD_PATH="${SYSROOT}" "$@"
+source /etc/portage/make.conf
+source /usr/src/gkern-config
+
+#emerge additional modules below
+#emerge -1 <yourmodulehere>

@@ -1,0 +1,364 @@
+	* options.h (retpolineplt): New -z option to use retpoline PLT.
+	* x86_64.cc (Output_data_plt_x86_64_retpoline): New class.
+	(Target_x86_64<64>::do_make_data_plt): Create retpoline PLT when
+	the option is used.
+	* testsuite/Makefile.am (retpoline_plt_1.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/retpoline_plt_1.sh: New test script.
+	* testsuite/retpoline_plt_1.s: New test source.
+
+diff --git a/gold/options.h b/gold/options.h
+index d5b8fe43ac..035e48110f 100644
+--- a/gold/options.h
++++ b/gold/options.h
+@@ -1426,6 +1426,9 @@ class General_options
+   DEFINE_bool(bndplt, options::DASH_Z, '\0', false,
+ 	      N_("(x86-64 only) Generate a BND PLT for Intel MPX"),
+ 	      N_("Generate a regular PLT"));
++  DEFINE_bool(retpolineplt, options::DASH_Z, '\0', false,
++	      N_("(x86-64 only) Generate a retpoline PLT"),
++	      N_("Generate a regular PLT"));
+   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
+ 	      N_("Sort dynamic relocs"),
+ 	      N_("Do not sort dynamic relocs"));
+diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
+index 16cae8004c..8c04091c8d 100644
+--- a/gold/testsuite/Makefile.am
++++ b/gold/testsuite/Makefile.am
+@@ -3219,6 +3219,15 @@ split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
+ MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+ 	split_x86_64_4 split_x86_64_r
+ 
++check_SCRIPTS += retpoline_plt_1.sh
++check_DATA += retpoline_plt_1.stdout
++retpoline_plt_1.o: retpoline_plt_1.s
++	$(TEST_AS) --64 -o $@ $<
++retpoline_plt_1.so: retpoline_plt_1.o ../ld-new
++	../ld-new -shared -z retpolineplt retpoline_plt_1.o -o $@
++retpoline_plt_1.stdout: retpoline_plt_1.so
++	$(TEST_OBJDUMP) -dw $< > $@
++
+ check_SCRIPTS += bnd_plt_1.sh
+ check_DATA += bnd_plt_1.stdout
+ bnd_plt_1.o: bnd_plt_1.s
+diff --git a/gold/testsuite/retpoline_plt_1.s b/gold/testsuite/retpoline_plt_1.s
+index e69de29bb2..0aa1be0228 100644
+--- a/gold/testsuite/retpoline_plt_1.s
++++ b/gold/testsuite/retpoline_plt_1.s
+@@ -0,0 +1,4 @@
++	.text
++	.globl _start
++_start:
++	call	foo1@plt
+diff --git a/gold/testsuite/retpoline_plt_1.sh b/gold/testsuite/retpoline_plt_1.sh
+index e69de29bb2..28be2034cb 100755
+--- a/gold/testsuite/retpoline_plt_1.sh
++++ b/gold/testsuite/retpoline_plt_1.sh
+@@ -0,0 +1,33 @@
++#!/bin/sh
++
++# retpoline_plt_1.sh -- test -z retpolineplt for x86_64
++
++# Copyright (C) 2016-2017 Free Software Foundation, Inc.
++# Written by Sriraman Tallam <tmsriram@google.com>.
++
++# This file is part of gold.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
++# MA 02110-1301, USA.
++
++noindirectjump()
++{
++  if egrep "$1" "$2" >/dev/null 2>&1; then
++    echo 1>&2 "Found indirect jump '$1' in $2"
++    exit 1
++  fi
++}
++
++noindirectjump 'jmpq[ ]*\*0x[0-9a-f]*\(%rip\)' retpoline_plt_1.stdout
+diff --git a/gold/x86_64.cc b/gold/x86_64.cc
+index a8140602b0..2eefe5d93e 100644
+--- a/gold/x86_64.cc
++++ b/gold/x86_64.cc
+@@ -542,6 +542,84 @@ class Output_data_plt_x86_64_bnd : public Output_data_plt_x86_64<64>
+   static const unsigned char plt_eh_frame_fde[plt_eh_frame_fde_size];
+ };
+ 
++template<int size>
++class Output_data_plt_x86_64_retpoline :  public Output_data_plt_x86_64<size>
++{
++ public:
++  Output_data_plt_x86_64_retpoline(Layout* layout,
++				   Output_data_got<64, false>* got,
++				   Output_data_got_plt_x86_64* got_plt,
++				   Output_data_space* got_irelative)
++    : Output_data_plt_x86_64<size>(layout, plt_entry_size,
++				   got, got_plt, got_irelative)
++  { }
++
++  Output_data_plt_x86_64_retpoline(Layout* layout,
++				   Output_data_got<64, false>* got,
++				   Output_data_got_plt_x86_64* got_plt,
++				   Output_data_space* got_irelative,
++				   unsigned int plt_count)
++    : Output_data_plt_x86_64<size>(layout, plt_entry_size,
++				   got, got_plt, got_irelative,
++				   plt_count)
++  { }
++
++ protected:
++  virtual unsigned int
++  do_get_plt_entry_size() const
++  { return plt_entry_size; }
++
++  virtual void
++  do_add_eh_frame(Layout* layout)
++  {
++    layout->add_eh_frame_for_plt(this,
++				 this->plt_eh_frame_cie,
++				 this->plt_eh_frame_cie_size,
++				 plt_eh_frame_fde,
++				 plt_eh_frame_fde_size);
++  }
++
++  virtual void
++  do_fill_first_plt_entry(unsigned char* pov,
++			  typename elfcpp::Elf_types<size>::Elf_Addr got_addr,
++			  typename elfcpp::Elf_types<size>::Elf_Addr plt_addr);
++
++  virtual unsigned int
++  do_fill_plt_entry(unsigned char* pov,
++		    typename elfcpp::Elf_types<size>::Elf_Addr got_address,
++		    typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
++		    unsigned int got_offset,
++		    unsigned int plt_offset,
++		    unsigned int plt_index);
++
++  virtual void
++  do_fill_tlsdesc_entry(unsigned char* pov,
++			typename elfcpp::Elf_types<size>::Elf_Addr got_address,
++			typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
++			typename elfcpp::Elf_types<size>::Elf_Addr got_base,
++			unsigned int tlsdesc_got_offset,
++			unsigned int plt_offset);
++
++ private:
++  // The size of an entry in the PLT.
++  static const int plt_entry_size = 32;
++
++  // The first entry in the PLT.
++  // From the AMD64 ABI: "Unlike Intel386 ABI, this ABI uses the same
++  // procedure linkage table for both programs and shared objects."
++  static const unsigned char first_plt_entry[plt_entry_size];
++
++  // Other entries in the PLT for an executable.
++  static const unsigned char plt_entry[plt_entry_size];
++
++  // The reserved TLSDESC entry in the PLT for an executable.
++  static const unsigned char tlsdesc_plt_entry[plt_entry_size];
++
++  // The .eh_frame unwind information for the PLT.
++  static const int plt_eh_frame_fde_size = 32;
++  static const unsigned char plt_eh_frame_fde[plt_eh_frame_fde_size];
++};
++
+ template<int size>
+ class Lazy_view
+ {
+@@ -1814,6 +1892,129 @@ Output_data_plt_x86_64_standard<size>::do_fill_tlsdesc_entry(
+ 						  + 12)));
+ }
+ 
++// The first entry in the PLT for an executable.
++
++template<int size>
++const unsigned char
++Output_data_plt_x86_64_retpoline<size>::first_plt_entry[plt_entry_size] =
++{
++  // Retpoline first PLT entry code sequence.
++  0xff, 0x35,			// pushq contents of memory address
++  0, 0, 0, 0,			// replaced with address of .got + 8
++  0x4c, 0x8b, 0x1d,		// mov GOT(%rip), %r11
++  0, 0, 0, 0,
++  0xe8, 0x04, 0, 0, 0,		// callq next
++  0xf3, 0x90,			// loop: pause
++  0xeb, 0xfc,			// jmp loop
++  0x4c, 0x89, 0x1c, 0x24,	// next: mov r11, %(rsp)
++  0xc3,				// ret
++  0xcc, 0xcc, 0xcc, 0xcc, 0xcc	// 5 extra bytes
++};
++
++template<int size>
++void
++Output_data_plt_x86_64_retpoline<size>::do_fill_first_plt_entry(
++    unsigned char* pov,
++    typename elfcpp::Elf_types<size>::Elf_Addr got_address,
++    typename elfcpp::Elf_types<size>::Elf_Addr plt_address)
++{
++  memcpy(pov, first_plt_entry, plt_entry_size);
++  // We do a jmp relative to the PC at the end of this instruction.
++  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
++					      (got_address + 8
++					       - (plt_address + 6)));
++  elfcpp::Swap<32, false>::writeval(pov + 9,
++				    (got_address + 16
++				     - (plt_address + 13)));
++}
++
++// The retpoline entries in the PLT for an executable.
++
++template<int size>
++const unsigned char
++Output_data_plt_x86_64_retpoline<size>::plt_entry[plt_entry_size] =
++{
++  // Retpoline PLT code sequence.
++  0x4c, 0x8b, 0x1d, 0, 0, 0, 0,	// mov sym@GOTPLT(%rip), r11
++  0xe8, 0x04, 0, 0, 0,		// callq next
++  0xf3, 0x90,			// loop: pause
++  0xeb, 0xfc,			// jmp loop
++  0x4c, 0x89, 0x1c, 0x24,	// next: mov r11, %(rsp)
++  0xc3,				// ret
++  0x68,				// pushq immediate
++  0, 0, 0, 0,			// replaced with offset into relocation table
++  0xe9,				// jmpq relative
++  0, 0, 0, 0,			// replaced with offset to start of .plt
++  0xcc				// extra byte
++};
++
++template<int size>
++unsigned int
++Output_data_plt_x86_64_retpoline<size>::do_fill_plt_entry(
++    unsigned char* pov,
++    typename elfcpp::Elf_types<size>::Elf_Addr got_address,
++    typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
++    unsigned int got_offset,
++    unsigned int plt_offset,
++    unsigned int plt_index)
++{
++  // Check PC-relative offset overflow in PLT entry.
++  uint64_t plt_got_pcrel_offset = (got_address + got_offset
++				   - (plt_address + plt_offset + 7));
++  if (Bits<32>::has_overflow(plt_got_pcrel_offset))
++    gold_error(_("PC-relative offset overflow in PLT entry %d"),
++	       plt_index + 1);
++
++  memcpy(pov, plt_entry, plt_entry_size);
++  elfcpp::Swap_unaligned<32, false>::writeval(pov + 3,
++					      plt_got_pcrel_offset);
++
++  elfcpp::Swap_unaligned<32, false>::writeval(pov + 22, plt_index);
++  elfcpp::Swap<32, false>::writeval(pov + 27,
++				    - (plt_offset + plt_entry_size - 1));
++
++  return 21;
++
++}
++
++// The reserved TLSDESC entry in the PLT for an executable.
++
++template<int size>
++const unsigned char
++Output_data_plt_x86_64_retpoline<size>::tlsdesc_plt_entry[plt_entry_size] =
++{
++  // From Alexandre Oliva, "Thread-Local Storage Descriptors for IA32
++  // and AMD64/EM64T", Version 0.9.4 (2005-10-10).
++  0xff, 0x35,	// pushq x(%rip)
++  0, 0, 0, 0,	// replaced with address of linkmap GOT entry (at PLTGOT + 8)
++  0xff,	0x25,	// jmpq *y(%rip)
++  0, 0, 0, 0,	// replaced with offset of reserved TLSDESC_GOT entry
++  0x0f,	0x1f,	// nop
++  0x40, 0
++};
++
++template<int size>
++void
++Output_data_plt_x86_64_retpoline<size>::do_fill_tlsdesc_entry(
++    unsigned char* pov,
++    typename elfcpp::Elf_types<size>::Elf_Addr got_address,
++    typename elfcpp::Elf_types<size>::Elf_Addr plt_address,
++    typename elfcpp::Elf_types<size>::Elf_Addr got_base,
++    unsigned int tlsdesc_got_offset,
++    unsigned int plt_offset)
++{
++  memcpy(pov, tlsdesc_plt_entry, plt_entry_size);
++  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
++					      (got_address + 8
++					       - (plt_address + plt_offset
++						  + 6)));
++  elfcpp::Swap_unaligned<32, false>::writeval(pov + 8,
++					      (got_base
++					       + tlsdesc_got_offset
++					       - (plt_address + plt_offset
++						  + 12)));
++}
++
+ // Return the APLT address to use for a global symbol (for -z bndplt).
+ 
+ uint64_t
+@@ -2036,6 +2237,34 @@ Output_data_plt_x86_64_standard<size>::plt_eh_frame_fde[plt_eh_frame_fde_size] =
+   elfcpp::DW_CFA_nop
+ };
+ 
++template<int size>
++const unsigned char
++Output_data_plt_x86_64_retpoline<size>::plt_eh_frame_fde[plt_eh_frame_fde_size] =
++{
++  0, 0, 0, 0,				// Replaced with offset to .plt.
++  0, 0, 0, 0,				// Replaced with size of .plt.
++  0,					// Augmentation size.
++  elfcpp::DW_CFA_def_cfa_offset, 16,	// DW_CFA_def_cfa_offset: 16.
++  elfcpp::DW_CFA_advance_loc + 6,	// Advance 6 to __PLT__ + 6.
++  elfcpp::DW_CFA_def_cfa_offset, 24,	// DW_CFA_def_cfa_offset: 24.
++  elfcpp::DW_CFA_advance_loc + 10,	// Advance 10 to __PLT__ + 16.
++  elfcpp::DW_CFA_def_cfa_expression,	// DW_CFA_def_cfa_expression.
++  11,					// Block length.
++  elfcpp::DW_OP_breg7, 8,		// Push %rsp + 8.
++  elfcpp::DW_OP_breg16, 0,		// Push %rip.
++  elfcpp::DW_OP_lit15,			// Push 0xf.
++  elfcpp::DW_OP_and,			// & (%rip & 0xf).
++  elfcpp::DW_OP_lit11,			// Push 0xb.
++  elfcpp::DW_OP_ge,			// >= ((%rip & 0xf) >= 0xb)
++  elfcpp::DW_OP_lit3,			// Push 3.
++  elfcpp::DW_OP_shl,			// << (((%rip & 0xf) >= 0xb) << 3)
++  elfcpp::DW_OP_plus,			// + ((((%rip&0xf)>=0xb)<<3)+%rsp+8
++  elfcpp::DW_CFA_nop,			// Align to 32 bytes.
++  elfcpp::DW_CFA_nop,
++  elfcpp::DW_CFA_nop,
++  elfcpp::DW_CFA_nop
++};
++
+ // The .eh_frame unwind information for the BND PLT.
+ const unsigned char
+ Output_data_plt_x86_64_bnd::plt_eh_frame_fde[plt_eh_frame_fde_size] =
+@@ -2287,6 +2516,9 @@ Target_x86_64<64>::do_make_data_plt(Layout* layout,
+   if (parameters->options().bndplt())
+     return new Output_data_plt_x86_64_bnd(layout, got, got_plt,
+ 					  got_irelative);
++  else if (parameters->options().retpolineplt())
++    return new Output_data_plt_x86_64_retpoline<64>(layout, got, got_plt,
++						    got_irelative);
+   else
+     return new Output_data_plt_x86_64_standard<64>(layout, got, got_plt,
+ 						   got_irelative);
+@@ -2316,6 +2548,9 @@ Target_x86_64<64>::do_make_data_plt(Layout* layout,
+   if (parameters->options().bndplt())
+     return new Output_data_plt_x86_64_bnd(layout, got, got_plt,
+ 					  got_irelative, plt_count);
++  else if (parameters->options().retpolineplt())
++    return new Output_data_plt_x86_64_retpoline<64>(layout, got, got_plt,
++						    got_irelative, plt_count);
+   else
+     return new Output_data_plt_x86_64_standard<64>(layout, got, got_plt,
+ 						   got_irelative,

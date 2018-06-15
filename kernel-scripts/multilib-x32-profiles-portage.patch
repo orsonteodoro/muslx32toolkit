@@ -1,0 +1,122 @@
+diff -Nurp portage.orig/profiles/default/linux/musl/amd64/x32/make.defaults portage/profiles/default/linux/musl/amd64/x32/make.defaults
+--- portage.orig/profiles/default/linux/musl/amd64/x32/make.defaults	2017-12-12 19:09:12.000000000 -0800
++++ portage/profiles/default/linux/musl/amd64/x32/make.defaults	2018-05-16 17:19:43.255292242 -0700
+@@ -1,13 +1,44 @@
+ # Copyright 1999-2015 Gentoo Foundation.
+ # Distributed under the terms of the GNU General Public License v2
+ 
++ARCH="amd64"
++ACCEPT_KEYWORDS="${ARCH}"
++
+ CHOST="x86_64-gentoo-linux-muslx32"
+ 
+ # Anthony G. Basile <blueness@gentoo.org> (31 Aug 2015)
+ # Multilib-related setup, bug #515130
+ ABI="x32"
+ DEFAULT_ABI="x32"
+-MULTILIB_ABIS="x32"
+-CHOST_x32="${CHOST}"
+-LIBDIR_x32="lib"
+-IUSE_IMPLICIT="abi_x86_x32"
++MULTILIB_ABIS="amd64 x86 x32"
++IUSE_IMPLICIT="-abi_x86_64 abi_x86_x32"
++
++USE_EXPAND_HIDDEN="-ABI_X86 -CPU_FLAGS_X86"
++
++# Orson Teodoro <orsonteodoro@hotmail.com> (15 May 2018)
++# Multilib dirs
++LIBDIR_amd64="lib64"
++LIBDIR_x86="lib32"
++LIBDIR_x32="libx32"
++SYMLINK_LIB="yes"
++
++# Orson Teodoro <orsonteodoro@hotmail.com> (15 May 2018)
++# 64bit specific settings.
++CFLAGS_amd64="-m64 -B/usr/x86_64-pc-linux-musl/usr/bin -B/usr/x86_64-pc-linux-musl/usr/lib -isystem /usr/x86_64-pc-linux-musl/usr/include -B/usr/lib/gcc/x86_64-pc-linux-muslx32/7.3.0/64"
++LDFLAGS_amd64="-m elf_x86_64"
++CHOST_amd64="x86_64-pc-linux-musl"
++
++# Orson Teodoro <orsonteodoro@hotmail.com> (15 May 2018)
++# 32bit specific settings.
++CFLAGS_x86="-m32 -B/usr/i686-pc-linux-musl/usr/bin -B/usr/i686-pc-linux-musl/usr/lib -isystem /usr/i686-pc-linux-musl/usr/include -B/usr/lib/gcc/x86_64-pc-linux-muslx32/7.3.0/32"
++LDFLAGS_x86="-m elf_i386"
++CHOST_x86="i686-pc-linux-musl"
++
++# Orson Teodoro <orsonteodoro@hotmail.com> (15 May 2018)
++# 64-32bit specific settings.
++CFLAGS_x32="-mx32 -B/usr/x86_64-pc-linux-muslx32/usr/bin -B/usr/x86_64-pc-linux-muslx32/usr/lib -isystem /usr/x86_64-pc-linux-muslx32/usr/include -B/usr/lib/gcc/x86_64-pc-linux-muslx32/7.3.0"
++LDFLAGS_x32="-m elf32_x86_64"
++CHOST_x32="x86_64-pc-linux-muslx32"
++
++
++
+diff -Nurp portage.orig/profiles/default/linux/musl/amd64/x32/package.use.force portage/profiles/default/linux/musl/amd64/x32/package.use.force
+--- portage.orig/profiles/default/linux/musl/amd64/x32/package.use.force	1969-12-31 16:00:00.000000000 -0800
++++ portage/profiles/default/linux/musl/amd64/x32/package.use.force	2018-05-19 11:43:30.973147713 -0700
+@@ -0,0 +1,36 @@
++# required to compile the kernel
++dev-libs/libelf abi_x86_64
++dev-libs/gmp abi_x86_64
++
++# required as a dependency for libelf
++sys-devel/gcc abi_x86_64 abi_x86_32
++cross-x86_64-pc-linux-muslx32/gcc abi_x86_64
++
++# required by multilib gcc
++# gcc requires abi_x86_32 to compile libgcc with multilib
++sys-libs/musl abi_x86_64 abi_x86_32
++cross-x86_64-pc-linux-muslx32/musl abi_x86_64 abi_x86_32
++
++# required compile time for cross compile multilib
++# ssp is already provided by musl
++cross-x86_64-pc-linux-muslx32/gcc -libssp
++sys-devel/gcc -libssp
++
++#not ported yet to x32
++app-emulation/wine -abi_x86_x32
++
++#force x86 instead of x32
++www-client/firefox -abi_x86_x32 abi_x86_32
++www-client/palemoon -abi_x86_x32 abi_x86_32
++dev-lang/rust -abi_x86_x32 abi_x86_32
++sys-devel/clang -abi_x86_x32 abi_x86_32
++app-office/libreoffice -abi_x86_x32 abi_x86_32
++net-misc/networkmanager -abi_x86_x32 abi_x86_32
++sys-boot/grub -abi_x86_x32 -abi_x86_64 abi_x86_32
++
++#force x86 because it causes runtime error with amd64 abi and nouveau
++www-client/surf -abi_x86_x32 -abi_x86_64 abi_x86_32
++net-libs/webkit-gtk -abi_x86_x32 -abi_x86_64 abi_x86_32 jit
++
++#x32 abi breaks test command and parallel emerge
++sys-apps/coreutils -abi_x86_x32 abi_x86_32
+diff -Nurp portage.orig/profiles/default/linux/musl/amd64/x32/use.force portage/profiles/default/linux/musl/amd64/x32/use.force
+--- portage.orig/profiles/default/linux/musl/amd64/x32/use.force	2017-12-12 19:09:12.000000000 -0800
++++ portage/profiles/default/linux/musl/amd64/x32/use.force	2018-05-16 17:19:43.270293756 -0700
+@@ -3,4 +3,6 @@
+ 
+ # Force the flag which corresponds to arch/abi, bug #515130
+ -abi_x86_64
++-abi_x86_32
+ abi_x86_x32
++-jit
+diff -Nurp portage.orig/profiles/default/linux/musl/amd64/x32/use.mask portage/profiles/default/linux/musl/amd64/x32/use.mask
+--- portage.orig/profiles/default/linux/musl/amd64/x32/use.mask	2017-12-12 19:09:12.000000000 -0800
++++ portage/profiles/default/linux/musl/amd64/x32/use.mask	2018-05-16 17:19:43.273294059 -0700
+@@ -2,5 +2,8 @@
+ # Distributed under the terms of the GNU General Public License v2
+ 
+ # Force the flag which corresponds to arch/abi, bug #515130
++-abi_x86_64
++-abi_x86_32
+ -abi_x86_x32
+-abi_x86_64
++-multilib
++-jit
+diff -Nurp portage.orig/profiles/hardened/linux/musl/amd64/x32/parent portage/profiles/hardened/linux/musl/amd64/x32/parent
+--- portage.orig/profiles/hardened/linux/musl/amd64/x32/parent	2017-12-12 19:39:12.000000000 -0800
++++ portage/profiles/hardened/linux/musl/amd64/x32/parent	2018-05-16 17:19:43.277294462 -0700
+@@ -1,2 +1,2 @@
+-../../../../../default/linux/musl/amd64/x32
+ ..
++../../../../../default/linux/musl/amd64/x32

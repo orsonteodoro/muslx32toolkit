@@ -1,0 +1,60 @@
+diff -urp portage.orig/eclass/multilib-minimal.eclass portage/eclass/multilib-minimal.eclass
+--- portage.orig/eclass/multilib-minimal.eclass	2018-05-07 01:23:49.000000000 -0700
++++ portage/eclass/multilib-minimal.eclass	2018-05-16 17:19:33.929352773 -0700
+@@ -110,7 +110,9 @@ multilib-minimal_src_install() {
+ 		fi
+ 
+ 		multilib_prepare_wrappers
+-		multilib_check_headers
++		if [[ "${PN}" != "musl" ]] ; then
++			multilib_check_headers
++		fi
+ 		popd >/dev/null || die
+ 	}
+ 	multilib_foreach_abi multilib-minimal_abi_src_install
+diff -urp portage.orig/eclass/multilib.eclass portage/eclass/multilib.eclass
+--- portage.orig/eclass/multilib.eclass	2017-05-16 12:10:33.000000000 -0700
++++ portage/eclass/multilib.eclass	2018-05-16 17:19:33.931352975 -0700
+@@ -323,6 +323,7 @@ multilib_env() {
+ 			export CFLAGS_x86=${CFLAGS_x86--m32}
+ 			export CHOST_x86=${CTARGET/x86_64/i686}
+ 			CHOST_x86=${CHOST_x86/%-gnux32/-gnu}
++			CHOST_x86=${CHOST_x86/%-muslx32/-musl}
+ 			export CTARGET_x86=${CHOST_x86}
+ 			if [[ ${SYMLINK_LIB} == "yes" ]] ; then
+ 				export LIBDIR_x86="lib32"
+@@ -332,16 +333,18 @@ multilib_env() {
+ 
+ 			export CFLAGS_amd64=${CFLAGS_amd64--m64}
+ 			export CHOST_amd64=${CTARGET/%-gnux32/-gnu}
++			export CHOST_amd64=${CHOST_amd64/%-muslx32/-musl}
+ 			export CTARGET_amd64=${CHOST_amd64}
+ 			export LIBDIR_amd64="lib64"
+ 
+ 			export CFLAGS_x32=${CFLAGS_x32--mx32}
+ 			export CHOST_x32=${CTARGET/%-gnu/-gnux32}
++			export CHOST_x32=${CHOST_x32/%-musl/-muslx32}
+ 			export CTARGET_x32=${CHOST_x32}
+ 			export LIBDIR_x32="libx32"
+ 
+ 			case ${CTARGET} in
+-			*-gnux32)
++			*-gnux32|*-muslx32)
+ 				: ${MULTILIB_ABIS=x32 amd64 x86}
+ 				: ${DEFAULT_ABI=x32}
+ 				;;
+diff -urp portage.orig/eclass/toolchain.eclass portage/eclass/toolchain.eclass
+--- portage.orig/eclass/toolchain.eclass	2018-05-05 05:08:49.000000000 -0700
++++ portage/eclass/toolchain.eclass	2018-05-16 17:19:33.934353278 -0700
+@@ -1207,6 +1207,11 @@ toolchain_src_configure() {
+ 			if hardened_gcc_is_stable ssp; then
+ 				export gcc_cv_libc_provides_ssp=yes
+ 			fi
++                        case ${CTARGET} in
++                                *-musl*)
++                                        export gcc_cv_libc_provides_ssp=yes
++                                        ;;
++                        esac
+ 			if use_if_iuse ssp; then
+ 				# On some targets USE="ssp -libssp" is an invalid
+ 				# configuration as target libc does not provide

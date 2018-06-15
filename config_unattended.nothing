@@ -8,11 +8,17 @@ X_mode="unattended" #possiblities: unattended, prompt
 X_0a="n" #"Unpack ${STAGE3_TARBALL} (y/n)"
 X_0b="n" #"Unpack ${PORTAGE_SNAPSHOT_TARBALL} (y/n)"
 X_0c="chroot-and-autorun-next-script" #"chroot into crossdev toolchain root? (y/n/chroot-and-autorun-next-script)"
+X_0d="n" #"Fix amd64 hardened profile (y/n)"
 
 #stage3 settings
 X_1="n" #"portage sync on crossdev-root? (y/n)"
 X_2="n" #"emerge portage on crosdev-root? (y/n)"
 X_3="n" #"apply package.mask for layman to emerge properly? (y/n)"
+X_3a="n" #"apply package.use for openssl/openssh to emerge properly? (y/n)"
+X_3b="n" #"apply package.use for openssl/openssh to emerge properly? (y/n)"
+X_3c="n" #"emerge openssh/openssl (y/n)"
+X_3d="n" #"apply package.use for git to emerge properly? (y/n)"
+X_3e="n" #"apply package.use for cross-x86_64-pc-linux-muslx32/gcc -openmp to emerge properly? (y/n)"
 X_4="n" #"emerge layman on crossdev-root? (y/n)"
 X_5="n" #"emerge crossdev on crossdev-root? (y/n)"
 X_6="skip" #"what to do with the musl overlay on crossdev-root? (clone/update/skip)"
@@ -31,9 +37,11 @@ X_15a="n" #"change cflags for /usr/${CROSSDEV_TARGET}/etc/portage/make.conf.nati
 X_16="chroot-and-autorun-next-script" #"chroot into crossdev profile? (y/n/chroot-and-autorun-next-script)"
 
 #stage4 settings
+X_114="y" #"apply retpoline fixes? (y/n)"
 X_17="skipall" #"emerge system? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 X_18="skipall" #"emerge world? this is to test if portage and the stage 3 image is properly working using the native toolchain.  (full/resume/skipfirstresume/skipall)"
 X_19="skipall" #"emerge wpa_supplicant? (full/resume/skipfirstresume/skipall)"
+X_19a="n" #"emerge openssh and openssl? (y/n)"
 X_20="n" #"emerge layman (required to update musl repository)? (y/n)"
 X_21="n" #"sync and update musl overlay? (y/n)"
 X_22="n" #"emerge dhcpcd? (y/n)"
@@ -121,9 +129,9 @@ X_107="n" #"emerge linux-firmware (y/n)"
 X_108="n" #"add fixalsa init script and add the service? (y/n)"
 X_109="n" #"add fixtty init script and add the service? (y/n)"
 X_110="n" #"add fixvideo init script and add the service? (y/n)"
-X_111="y" #"emerge dmenu (y/n)"
-X_112="y" #"emerge mesa-progs (y/n)"
-X_113="y" #"emerge timezone-data (y/n)"
+X_111="n" #"emerge dmenu (y/n)"
+X_112="n" #"emerge mesa-progs (y/n)"
+X_113="n" #"emerge timezone-data (y/n)"
 
 X_42="n" #"set root password? (y/n)"
 X_49="n" #"add user (y/n)" #specifying y will prompt user name and password requested from useradd

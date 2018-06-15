@@ -1,0 +1,16 @@
+--- a/tools/build/Makefile.build.orig	2018-01-28 21:20:33.000000000 +0000
++++ a/tools/build/Makefile.build	2018-04-26 05:53:57.629065670 +0000
+@@ -81,11 +81,11 @@ quiet_cmd_gen = GEN      $@
+ # If there's nothing to link, create empty $@ object.
+ quiet_cmd_ld_multi = LD       $@
+       cmd_ld_multi = $(if $(strip $(obj-y)),\
+-                     $(LD) -r -o $@  $(filter $(obj-y),$^),rm -f $@; $(AR) rcs $@)
++                     $(LD) -m elf32_x86_64 -r -o $@  $(filter $(obj-y),$^),rm -f $@; $(AR) rcs $@)
+ 
+ quiet_cmd_host_ld_multi = HOSTLD   $@
+       cmd_host_ld_multi = $(if $(strip $(obj-y)),\
+-                          $(HOSTLD) -r -o $@  $(filter $(obj-y),$^),rm -f $@; $(HOSTAR) rcs $@)
++                          $(HOSTLD) -m elf32_x86_64 -r -o $@  $(filter $(obj-y),$^),rm -f $@; $(HOSTAR) rcs $@)
+ 
+ ifneq ($(filter $(obj),$(hostprogs)),)
+   host = host_

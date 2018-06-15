@@ -1,6 +1,6 @@
 # muslx32toolkit
 
-WARNING: Using the cleaner script can cause data loss of you do not unmount your partitions especially on /mnt.  An update to fix this will be coming.
+WARNING: UPDATE IMMEDIATELY IF YOU ARE USING THE OLDER CLEANER SCRIPT!  BE CAREFUL TO DO A COMPREHENSIVE WIPE.  YOU SHOULD DO IT MANUALLY BUT MAKE SURE YOU DON'T DELETE YOUR MOUNTED DRIVE FOR ANOTHER GENTOO INSTALLATION OR PERSONAL DATA BEING REFERENCED BY /mnt.
 
 BASH Scripts for Gentoo Linux to build stage3 and stage4 images using crossdev for the muslx32 platform
 
@@ -52,6 +52,10 @@ The script relies on the following Portage overlays which the create-stage3 scri
 * https://github.com/orsonteodoro/muslx32
 * https://github.com/gentoo/musl
 * https://github.com/lluixhi/musl-extras
+
+The latest is experimental and has not been tested with the latest --sync.
+
+You may need to override the /usr/portage/profile or /usr/x86-pc-linux-muslx32/usr/portage/profile with the multilib-x32-eclasses-portage.patch multilib-x32-profiles-portage.patch patches contained in the kernel-scripts folder for multilib support.  Multilib support is necessary for grub and other programs that will never support x32 abi.
 
 ## License
 
